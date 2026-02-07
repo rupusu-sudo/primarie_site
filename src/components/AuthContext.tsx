@@ -1,44 +1,55 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 const AuthContext = createContext<any>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('admin_token'));
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('admin_user');
-    if (savedUser && savedUser !== "undefined" && token) {
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  
+  const [user, setUser] = useState<any>(() => {
+    const savedUser = localStorage.getItem('user');
+    const savedToken = localStorage.getItem('token');
+    if (savedUser && savedUser !== "undefined" && savedToken) {
       try {
-        setUser(JSON.parse(savedUser));
+        return JSON.parse(savedUser);
       } catch (e) {
-        handleLogout(); 
+        return null;
       }
     }
-  }, [token]);
+    return null;
+  });
 
-  const handleLogin = (data: any) => {
-    if (!data.token || !data.user) return;
-    localStorage.setItem('admin_token', data.token);
-    localStorage.setItem('admin_user', JSON.stringify(data.user));
+  const handleLogin = useCallback((data: { token: string; user: any }) => {
+    if (!data || !data.token || !data.user) return;
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
     setToken(data.token);
     setUser(data.user);
-  };
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_user');
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-  };
-
+    window.location.href = "/";
+  }, []);
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
 
   return (
-    <AuthContext.Provider value={{ user, token, isAdmin, login: handleLogin, logout: handleLogout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token,      
+      isAdmin, 
+      login: handleLogin, 
+      logout: handleLogout 
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) throw new Error("useAuth trebuie folosit în AuthProvider");
+  return context;
+};

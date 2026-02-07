@@ -26,8 +26,28 @@ model Document {
   authorName  String?  @db.VarChar(255) 
   content     String?  @db.Text
   fileUrl     String?  @db.VarChar(500)
-  year        Int?
+  likes       Int      @default(0)
+  officialSupport Boolean  @default(false)
+  ownerId     String?  @db.VarChar(100)
+  parentId    Int?     
+  parent      Document?  @relation("ThreadRelation", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Document[] @relation("ThreadRelation")
+  documentLikes DocumentLike[]
+
+  // Păstrat pentru compatibilitatea cu restul modulelor (HCL, Buget etc.)
+  year        Int?     
   createdAt   DateTime @default(now())
 
   @@map("Document")
+}
+
+model DocumentLike {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  deviceId   String   @db.VarChar(100)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, deviceId])
+  @@map("DocumentLike")
 }

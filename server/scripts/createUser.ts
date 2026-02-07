@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 
 async function createUser() {
     try {
-        // Verifică dacă userul există deja
         const existingUser = await prisma.user.findUnique({
             where: { email: 'admin@primarie.ro' }
         });
@@ -18,11 +17,7 @@ async function createUser() {
             await prisma.$disconnect();
             return;
         }
-
-        // Hash-uiește parola
         const hashedPassword = await bcrypt.hash('admin123', 10);
-        
-        // Creează userul
         const user = await prisma.user.create({
             data: {
                 email: 'admin@primarie.ro',
@@ -37,7 +32,7 @@ async function createUser() {
         console.log('Parolă: admin123');
         console.log('Rol:', user.role);
     } catch (error) {
-        console.error('❌ Eroare la creare user:', error);
+        console.error('Eroare la creare user:', error);
     } finally {
         await prisma.$disconnect();
     }

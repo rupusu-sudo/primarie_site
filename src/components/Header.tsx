@@ -4,7 +4,7 @@ import {
   Menu, ChevronDown, MessageSquare, Lock, LogOut, 
   Phone, Mail, Home, Landmark, 
   FileSearch, ClipboardList, Laptop, Bell, Headset,
-  TrendingUp 
+  TrendingUp, ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/AuthContext"; 
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/accordion";
 
 const Header = () => {
-  // Extragem starea de autentificare din noul context MySQL/Prisma
+  // Extragem starea de autentificare și funcția de logout
   const { user, logout, isAdmin } = useAuth(); 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,6 +46,7 @@ const Header = () => {
 
   const navLinks = [
     { name: "Acasă", href: "/", icon: <Home className="w-3.5 h-3.5" /> },
+    { name: "Vocea Almăjului", href: "/vocea-almajului", icon: <MessageSquare className="w-3.5 h-3.5" />, highlight: true },
     { 
       name: "Primăria", 
       href: "/primaria",
@@ -114,18 +115,19 @@ const Header = () => {
 
             <div className="w-px h-4 bg-slate-200 mx-1" />
 
-            {/* LOGICA DE AUTENTIFICARE MySQL */}
+            {/* LOGICA DE AUTENTIFICARE */}
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="flex flex-col items-end leading-none">
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${isAdmin ? 'text-blue-700' : 'text-slate-500'}`}>
-                    {isAdmin ? 'Panel Administrativ' : 'Utilizator Logat'}
+                  <span className={`text-[8px] font-black uppercase tracking-widest flex items-center gap-1 ${isAdmin ? 'text-blue-700' : 'text-slate-500'}`}>
+                    {isAdmin && <ShieldCheck className="w-2.5 h-2.5" />}
+                    {isAdmin ? 'Mod Administrator' : 'Utilizator Logat'}
                   </span>
                   <span className="text-[10px] font-bold text-slate-800">{user.name}</span>
                 </div>
                 <button 
                   onClick={logout} 
-                  className="flex items-center gap-1.5 bg-red-50 border border-red-100 px-4 py-1 rounded-full text-[10px] font-black text-red-600 uppercase tracking-wider hover:bg-red-600 hover:text-white transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 bg-red-50 border border-red-100 px-4 py-1 rounded-full text-[10px] font-black text-red-600 uppercase tracking-wider hover:bg-red-600 hover:text-white transition-colors shadow-sm active:scale-95"
                 >
                   <LogOut className="w-3 h-3" /> Ieșire
                 </button>
@@ -141,10 +143,10 @@ const Header = () => {
 
       {/* 2. MAIN HEADER */}
       <header 
-        className={`sticky top-0 left-0 right-0 z-50 transform-gpu backface-invisible will-change-transform transition-[padding,background-color,box-shadow] duration-300 ease-out ${
+        className={`sticky top-0 left-0 right-0 z-50 transform-gpu backface-invisible will-change-transform transition-all duration-300 ease-out ${
           isScrolled 
-            ? "bg-white/90 backdrop-blur-md shadow-lg py-2 border-b border-slate-100" 
-            : "bg-white py-5 border-b border-transparent"
+            ? "bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 py-2 border-b border-slate-100" 
+            : "bg-white py-5 border-b border-slate-100/50"
         }`}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
@@ -152,7 +154,7 @@ const Header = () => {
             <img 
               src="/flavicon.png" 
               alt="Stema" 
-              className={`transition-all duration-300 origin-left ${isScrolled ? "h-9 scale-95" : "h-12 scale-100"}`} 
+              className={`transition-all duration-300 origin-left ${isScrolled ? "h-9 scale-95" : "h-12 scale-100"} group-hover:scale-105`} 
             />
             <div className="flex flex-col">
               <h1 className={`font-black text-slate-900 leading-none tracking-tighter uppercase transition-all duration-300 origin-left ${isScrolled ? "text-base scale-95" : "text-xl scale-100"}`}>
@@ -186,24 +188,22 @@ const Header = () => {
                 <Link 
                   key={link.name} 
                   to={link.href} 
-                  className={`flex items-center gap-2 px-3 py-2 text-[11px] font-black uppercase tracking-tight transition-colors rounded-lg ${
-                    location.pathname === link.href ? "text-blue-800 bg-blue-50" : "text-slate-700 hover:text-blue-800 hover:bg-blue-50"
+                  className={`flex items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-tight transition-all duration-200 rounded-xl ${
+                    (link as any).highlight 
+                      ? "bg-slate-900 text-white hover:bg-blue-700 hover:shadow-md" 
+                      : location.pathname === link.href 
+                        ? "text-blue-800 bg-blue-50" 
+                        : "text-slate-700 hover:text-blue-800 hover:bg-blue-50"
                   }`}
                 >
-                  <span className={location.pathname === link.href ? "text-blue-800" : "text-blue-700 opacity-80 group-hover:opacity-100"}>{link.icon}</span>
+                  <span className={location.pathname === link.href || (link as any).highlight ? "opacity-100" : "text-blue-700 opacity-80"}>{link.icon}</span>
                   {link.name}
                 </Link>
               )
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            <Link to="/vocea-almajului" className="hidden lg:block">
-              <Button size="sm" className="bg-slate-900 hover:bg-blue-800 text-white font-black text-[10px] uppercase tracking-widest px-6 h-10 rounded-xl transition-all shadow-xl">
-                <MessageSquare className="w-4 h-4 mr-2" /> Vocea Almăjului
-              </Button>
-            </Link>
-
+          <div className="flex items-center gap-2">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className="xl:hidden">
                 <Button variant="ghost" size="icon" className="rounded-xl bg-slate-50 hover:bg-blue-50">
@@ -211,9 +211,9 @@ const Header = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[320px] p-0 border-none shadow-2xl flex flex-col h-full bg-white z-[100]">
-                <div className="bg-blue-800 p-6 text-white shrink-0 min-h-[140px] flex flex-col justify-end">
-                    <h2 className="text-2xl font-black uppercase tracking-tighter">Meniul Comunei</h2>
-                    <p className="text-blue-100 text-[10px] font-bold uppercase tracking-widest mt-1">Instituția Primarului Almăj</p>
+                <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6 text-white shrink-0 min-h-[140px] flex flex-col justify-end">
+                    <h2 className="text-2xl font-bold uppercase tracking-tight">Meniul Comunei</h2>
+                    <p className="text-blue-200/90 text-[10px] font-medium uppercase tracking-wider mt-1">Instituția Primarului Almăj</p>
                 </div>
                 <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col gap-1">
                   {navLinks.map((link, index) => (
@@ -236,7 +236,15 @@ const Header = () => {
                            </AccordionItem>
                         </Accordion>
                       ) : (
-                        <Link to={link.href} onClick={() => setIsOpen(false)} className="flex items-center gap-3 py-3 px-2 text-base font-black uppercase text-slate-800 hover:text-blue-800 hover:bg-blue-50 rounded-lg">
+                        <Link 
+                          to={link.href} 
+                          onClick={() => setIsOpen(false)} 
+                          className={`flex items-center gap-3 py-3 px-3 text-base font-semibold uppercase rounded-xl transition-all ${
+                            (link as any).highlight 
+                              ? "bg-slate-900 text-white hover:bg-blue-700" 
+                              : "text-slate-800 hover:text-blue-800 hover:bg-blue-50"
+                          }`}
+                        >
                           {link.icon} <span>{link.name}</span>
                         </Link>
                       )}
