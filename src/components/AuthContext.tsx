@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext<any>(undefined);
 
@@ -8,19 +8,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('admin_user');
-    
-    // Verificăm dacă avem date și dacă sunt valide
     if (savedUser && savedUser !== "undefined" && token) {
       try {
-        const parsed = JSON.parse(savedUser);
-        setUser(parsed);
+        setUser(JSON.parse(savedUser));
       } catch (e) {
-        // Dacă dă eroare la parse, curățăm tot imediat
-        console.error("Date corupte detectate. Resetare...");
         handleLogout(); 
       }
-    } else if (savedUser === "undefined") {
-        handleLogout();
     }
   }, [token]);
 
@@ -33,13 +26,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_user');
     setToken(null);
     setUser(null);
   };
 
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+
   return (
-    <AuthContext.Provider value={{ user, token, login: handleLogin, logout: handleLogout }}>
+    <AuthContext.Provider value={{ user, token, isAdmin, login: handleLogin, logout: handleLogout }}>
       {children}
     </AuthContext.Provider>
   );

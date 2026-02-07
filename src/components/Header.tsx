@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/accordion";
 
 const Header = () => {
-  const { user, logout } = useAuth(); 
-  const isAdmin = !!user; 
+  // Extragem starea de autentificare din noul context MySQL/Prisma
+  const { user, logout, isAdmin } = useAuth(); 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -114,12 +114,23 @@ const Header = () => {
 
             <div className="w-px h-4 bg-slate-200 mx-1" />
 
-            {isAdmin ? (
-              <button onClick={logout} className="flex items-center gap-1.5 bg-red-50 border border-red-100 px-4 py-1 rounded-full text-[10px] font-black text-red-600 uppercase tracking-wider hover:bg-red-600 hover:text-white transition-colors shadow-sm">
-                <LogOut className="w-3 h-3" /> Ieșire Panel
-              </button>
+            {/* LOGICA DE AUTENTIFICARE MySQL */}
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end leading-none">
+                  <span className={`text-[8px] font-black uppercase tracking-widest ${isAdmin ? 'text-blue-700' : 'text-slate-500'}`}>
+                    {isAdmin ? 'Panel Administrativ' : 'Utilizator Logat'}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-800">{user.name}</span>
+                </div>
+                <button 
+                  onClick={logout} 
+                  className="flex items-center gap-1.5 bg-red-50 border border-red-100 px-4 py-1 rounded-full text-[10px] font-black text-red-600 uppercase tracking-wider hover:bg-red-600 hover:text-white transition-colors shadow-sm"
+                >
+                  <LogOut className="w-3 h-3" /> Ieșire
+                </button>
+              </div>
             ) : (
-              // REDIRECȚIONARE CĂTRE PAGINA DEDICATĂ
               <Link to="/login-admin" className="flex items-center gap-1.5 bg-blue-800 px-4 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-wider hover:bg-slate-900 transition-colors shadow-md active:scale-95">
                 <Lock className="w-3 h-3" /> Autentificare
               </Link>
