@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   
+  role      String   @default("USER")
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("User")
+}
+
+model Document {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  category    String   @db.VarChar(100)
+  authorName  String?  @db.VarChar(255) 
+  content     String?  @db.Text
+  fileUrl     String?  @db.VarChar(500)
+  year        Int?
+  createdAt   DateTime @default(now())
+
+  @@map("Document")
+}
