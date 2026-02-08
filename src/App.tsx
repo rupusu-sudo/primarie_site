@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
  * Funcție pentru a forța o întârziere minimă la încărcarea paginilor (Lazy Loading)
  * Astfel, LoadingScreen-ul nu va mai "pâlpâi" rapid.
  */
-const lazyWithDelay = (importFn: () => Promise<any>, delay = 1200) => {
+const lazyWithDelay = (importFn: () => Promise<any>, delay = 800) => {
   return lazy(() => 
     Promise.all([
       importFn(),
@@ -30,9 +30,6 @@ const lazyWithDelay = (importFn: () => Promise<any>, delay = 1200) => {
 const Index = lazyWithDelay(() => import("./pages/Index"));
 const Primaria = lazyWithDelay(() => import("./pages/Primaria"));
 const ConsiliulLocal = lazyWithDelay(() => import("./pages/ConsiliulLocal"));
-const Primar = lazyWithDelay(() => import("./pages/Primar"));
-const Viceprimar = lazyWithDelay(() => import("./pages/Viceprimar"));
-const Secretar = lazyWithDelay(() => import("./pages/Secretar"));
 const Organigrama = lazyWithDelay(() => import("./pages/Organigrama"));
 const Contact = lazyWithDelay(() => import("./pages/Contact"));
 const Istoric = lazyWithDelay(() => import("./pages/Istoric"));
@@ -43,6 +40,11 @@ const VoceaAlmajului = lazyWithDelay(() => import("./pages/VoceaAlmajului"));
 const OportunitatiDeDezvoltare = lazyWithDelay(() => import("./pages/OportunitatiDeDezvoltare"));
 const LoginAdmin = lazyWithDelay(() => import("./pages/LoginAdmin"));
 const NotFound = lazyWithDelay(() => import("./pages/NotFound"));
+
+// --- CONDUCERE & EXECUTIV (AICI SUNT MODIFICĂRILE TALE) ---
+const Primar = lazyWithDelay(() => import("./pages/Primar"));
+const Viceprimar = lazyWithDelay(() => import("./pages/Viceprimar"));
+const Secretar = lazyWithDelay(() => import("./pages/Secretar"));
 
 // --- MONITOR OFICIAL ---
 const MonitorulOficial = lazyWithDelay(() => import("./pages/MonitorulOficial"));
@@ -84,14 +86,21 @@ const App = () => (
             <main className="min-h-screen">
               <Routes>
                 {/* Rute Principale */}
-                <Route path="/harta-digitala" element={<HartaDigitala />} />
                 <Route path="/" element={<Index />} />
+                <Route path="/harta-digitala" element={<HartaDigitala />} />
+                
+                {/* Instituție */}
                 <Route path="/primaria" element={<Primaria />} />
                 <Route path="/consiliul-local" element={<ConsiliulLocal />} />
-                <Route path="/primar" element={<Primar />} />
-                <Route path="/viceprimar" element={<Viceprimar />} />
-                <Route path="/secretar" element={<Secretar />} />
                 <Route path="/organigrama" element={<Organigrama />} />
+                
+                {/* --- RUTELE PENTRU PRIMAR, VICEPRIMAR, SECRETAR --- */}
+                {/* Aceste rute trebuie să corespundă cu link-urile din meniu/site */}
+                <Route path="/primaria/primar" element={<Primar />} />
+                <Route path="/primaria/viceprimar" element={<Viceprimar />} />
+                <Route path="/primaria/secretar-general" element={<Secretar />} />
+                
+                {/* Informații */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/istoric" element={<Istoric />} />
                 <Route path="/cultura" element={<Cultura />} />
@@ -99,7 +108,7 @@ const App = () => (
                 <Route path="/instiintari" element={<Instiintari />} />
                 <Route path="/vocea-almajului" element={<VoceaAlmajului />} />
                 <Route path="/oportunitati" element={<OportunitatiDeDezvoltare />} />
-                <Route path="/login-admin" element={<LoginAdmin />} />
+                <Route path="/login" element={<LoginAdmin />} />
                 
                 {/* Rute Monitor Oficial */}
                 <Route path="/monitorul-oficial" element={<MonitorulOficial />} />
@@ -126,6 +135,7 @@ const App = () => (
                 <Route path="/servicii/asistenta-sociala" element={<AsistentaSociala />} />
                 <Route path="/servicii/fond-locativ" element={<FondLocativ />} />
 
+                {/* 404 Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

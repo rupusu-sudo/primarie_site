@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Menu, Phone, ChevronDown, LogOut, 
-  MessageCircle, User, Map, ChevronRight, X, // Am adăugat MessageCircle
+  MessageCircle, User, Map, ChevronRight, X, 
   CreditCard, FileText, Megaphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -99,19 +99,14 @@ const Header = () => {
             })}
           </div>
         </nav>
-
-        {/* --- ACȚIUNI DREAPTA (DOAR VOCEA ALMĂJULUI) --- */}
         <div className="flex items-center gap-2 shrink-0">
-          
-          {/* Buton Principal: VOCEA ALMĂJULUI (Cu iconiță Chat) */}
           <Link to="/vocea-almajului" className="hidden lg:flex">
             <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 px-6 font-bold border-0 transition-all hover:scale-105 active:scale-95">
               <MessageCircle className="w-4 h-4 mr-2" /> 
               Vocea Almăjului
             </Button>
           </Link>
-
-          {/* User / Login */}
+          
           <div className="hidden lg:flex items-center pl-2 ml-1">
             {user ? (
                <DropdownMenu>

@@ -1,62 +1,38 @@
-import React from "react";
-import { Home, ChevronRight } from "lucide-react";
-import LoadingScreen from "@/components/LoadingScreen"; 
+import React from 'react';
 interface PageLayoutProps {
-  title?: string;
-  breadcrumbs?: { label: string; href?: string }[];
   children: React.ReactNode;
-  isLoading?: boolean; 
-  rightAction?: React.ReactNode;
+  breadcrumbs?: { label: string; href?: string }[];
+  title?: string;
 }
 
-const PageLayout = ({ 
-  title, 
-  breadcrumbs, 
-  children, 
-  isLoading = false,
-  rightAction 
-}: PageLayoutProps) => {
-
-  // AICI ESTE SCHIMBAREA: Folosim componenta ta custom
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
+const PageLayout = ({ children, breadcrumbs, title }: PageLayoutProps) => {
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          
-          <div className="flex items-center gap-2 text-sm text-slate-500 overflow-hidden">
-            <a href="/" className="hover:text-blue-600 transition-colors">
-              <Home className="w-4 h-4" />
-            </a>
-            {breadcrumbs?.map((crumb, index) => (
-              <React.Fragment key={index}>
-                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                {crumb.href ? (
-                  <a href={crumb.href} className="hover:text-blue-600 transition-colors whitespace-nowrap">
-                    {crumb.label}
-                  </a>
-                ) : (
-                  <span className="font-medium text-slate-800 whitespace-nowrap truncate">
-                    {crumb.label}
-                  </span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {rightAction && (
-            <div className="ml-4">
-              {rightAction}
-            </div>
-          )}
+    <div className="flex flex-col font-sans text-slate-900 bg-slate-50 w-full">
+      <main className="flex-grow pt-4 pb-16 px-4 lg:px-8"> 
+        <div className="container mx-auto">
+            {breadcrumbs && (
+                <nav className="flex mb-6 text-sm text-slate-500 overflow-x-auto whitespace-nowrap py-2" aria-label="Breadcrumb">
+                    <ol className="inline-flex items-center space-x-1 md:space-x-3">
+                        {breadcrumbs.map((crumb, index) => (
+                            <li key={index} className="inline-flex items-center">
+                                {index > 0 && <span className="mx-2 text-slate-300">/</span>}
+                                {crumb.href && crumb.href !== '#' ? (
+                                    <a href={crumb.href} className="hover:text-blue-600 transition-colors font-medium">
+                                        {crumb.label}
+                                    </a>
+                                ) : (
+                                    <span className="font-bold text-slate-800">{crumb.label}</span>
+                                )}
+                            </li>
+                        ))}
+                    </ol>
+                </nav>
+            )}
+            {title && (
+              <h1 className="text-3xl font-bold mb-6 text-slate-900">{title}</h1>
+            )}
+            {children}
         </div>
-      </div>
-
-      <main className="animate-in fade-in duration-500">
-        {children}
       </main>
     </div>
   );

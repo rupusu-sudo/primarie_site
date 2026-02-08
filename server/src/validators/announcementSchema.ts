@@ -1,16 +1,12 @@
 import { z } from 'zod';
 
-
 export const announcementSchema = z.object({
   title: z.string().min(5, 'Titlul trebuie să aibă cel puțin 5 caractere'),
-  content: z.string().min(20, 'Conținutul trebuie să aibă cel puțin 20 caractere'),
-  category: z.enum(['official', 'event', 'news', 'urgent'], {
+  content: z.string().min(10, 'Conținutul trebuie să aibă cel puțin 10 caractere'),
+  category: z.enum(['General', 'Urgent', 'Informativ', 'Cultura'], {
     errorMap: () => ({ message: 'Categoria nu este validă' })
-  }),
-  priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  publishDate: z.string().datetime().optional(),
-  expiryDate: z.string().datetime().optional(),
-  attachments: z.array(z.string()).optional(),
+  }).default('General'),
+  fileUrl: z.string().optional().nullable(),
 });
 
 export type AnnouncementInput = z.infer<typeof announcementSchema>;
