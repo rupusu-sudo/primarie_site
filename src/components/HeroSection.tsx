@@ -1,86 +1,124 @@
-import { MapPin, Bell, Users, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CreditCard, FileText, Building2, Bell, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
-  return (
-    // Folosim 'hero-gradient' pentru fundalul standard albastru definit în index.css
-    <section className="hero-gradient relative overflow-hidden min-h-[500px] flex items-center justify-center">
-      
-      <div className="container mx-auto px-4 py-16 lg:py-24">
-        {/* Am scos grid-ul și am pus totul într-un container centrat */}
-        <div className="max-w-4xl mx-auto text-center text-primary-foreground animate-in zoom-in-95 fade-in duration-700">
-          
-          {/* Badge Locație */}
-          <div className="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mx-auto hover:bg-white/20 transition-colors cursor-default">
-            <MapPin className="w-4 h-4" />
-            <span className="text-sm font-medium tracking-wide">Județul Dolj, România</span>
-          </div>
-          
-          {/* Titlu Principal */}
-          <h1 className="text-4xl lg:text-5xl xl:text-7xl font-bold mb-6 leading-tight drop-shadow-md">
-            Primăria Comunei
-            <br />
-            <span className="text-blue-100 opacity-95">Almăj</span>
-          </h1>
-          
-          {/* Descriere */}
-          <p className="text-lg md:text-xl text-blue-50/90 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
-            Administrație publică transparentă și dedicată cetățenilor. <br className="hidden md:block" />
-            Acces facil la servicii, informații și documente publice.
-          </p>
-          
-          {/* Butoane */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/anunturi">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-blue-900">
-                <Bell className="w-5 h-5 mr-2 text-blue-700" />
-                Anunțuri importante
-                <ArrowRight className="w-4 h-4 ml-2 text-blue-700 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            
-            <Link to="/servicii">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/10 border-white/40 text-white hover:bg-white/20 backdrop-blur-sm font-semibold">
-                <Users className="w-5 h-5 mr-2" />
-                Servicii cetățeni
-              </Button>
-            </Link>
-          </div>
-          
-          {/* Statistici (Centrate și ele) */}
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 border-t border-white/20 pt-10 opacity-90">
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="stat-dot bg-green-400 w-2 h-2 rounded-full shadow-[0_0_8px_#4ade80]"></span>
-                <span className="font-bold text-2xl leading-none">2.211</span>
-              </div>
-              <span className="text-blue-100 text-xs uppercase tracking-wider opacity-80">Locuitori</span>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="stat-dot bg-blue-300 w-2 h-2 rounded-full shadow-[0_0_8px_#93c5fd]"></span>
-                <span className="font-bold text-2xl leading-none">4</span>
-              </div>
-              <span className="text-blue-100 text-xs uppercase tracking-wider opacity-80">Sate</span>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="stat-dot bg-yellow-400 w-2 h-2 rounded-full shadow-[0_0_8px_#facc15]"></span>
-                <span className="font-bold text-2xl leading-none">672</span>
-              </div>
-              <span className="text-blue-100 text-xs uppercase tracking-wider opacity-80">Gospodării</span>
-            </div>
-          </div>
+  // Imagine statică de fundal (Peisaj rural deschis)
+  const heroImage = "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop";
 
+  return (
+    <section className="relative w-full overflow-hidden bg-white pt-12 pb-16 lg:pt-32 lg:pb-40 min-h-[600px] flex flex-col justify-center">
+      
+      {/* --- FUNDAL STATIC --- */}
+      <div className="absolute inset-0 pointer-events-none">
+        <img 
+          src={heroImage} 
+          alt="Peisaj Comuna Almăj" 
+          className="w-full h-full object-cover"
+        />
+        
+        {/* --- GRADIENT OVERLAY (Esențial pentru citire) --- */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white/95"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
+      </div>
+
+      <div className="container relative z-10 mx-auto px-4 flex flex-col items-center">
+        
+        {/* Badge Instituțional */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 backdrop-blur-md px-3 py-1 text-[10px] sm:text-xs font-bold text-blue-800 shadow-sm mb-6 uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+          </span>
+          Portal Oficial
+        </div>
+
+        {/* Titlu */}
+        <h1 className="text-4xl font-black tracking-tighter text-slate-900 sm:text-6xl md:text-7xl mb-4 text-center leading-[1.1] animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+          Primăria <br className="block sm:hidden" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">
+            Almăj
+          </span>
+        </h1>
+
+        {/* Subtitlu */}
+        <p className="text-base sm:text-lg text-slate-700 max-w-xl text-center leading-relaxed font-semibold mb-8 sm:mb-12 px-2 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+          Administrație digitală la un click distanță. Rezolvă problemele rapid, direct de pe telefon.
+        </p>
+
+        {/* --- GRID BUTOANE (Mobile Friendly) --- */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 w-full max-w-5xl animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
+          <MobileActionCard 
+            to="/servicii/taxe" 
+            icon={<CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />} 
+            title="Taxe" 
+            subtitle="Plătește online"
+            color="blue"
+          />
+          <MobileActionCard 
+            to="/monitorul-oficial" 
+            icon={<FileText className="w-5 h-5 sm:w-6 sm:h-6" />} 
+            title="Acte" 
+            subtitle="Monitor Oficial"
+            color="indigo"
+          />
+          <MobileActionCard 
+            to="/servicii/urbanism" 
+            icon={<Building2 className="w-5 h-5 sm:w-6 sm:h-6" />} 
+            title="Urbanism" 
+            subtitle="Autorizații"
+            color="emerald"
+          />
+          <MobileActionCard 
+            to="/anunturi" 
+            icon={<Bell className="w-5 h-5 sm:w-6 sm:h-6" />} 
+            title="Avizier" 
+            subtitle="Noutăți"
+            color="amber"
+          />
+        </div>
+
+        {/* Link-uri Secundare */}
+        <div className="mt-8 sm:mt-12 flex flex-col w-full sm:w-auto gap-3 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
+          <Button asChild size="lg" className="w-full sm:w-auto rounded-xl bg-blue-600 text-white hover:bg-indigo-700 active:scale-95 transition-all shadow-xl shadow-slate-900/10 h-12 text-base font-bold">
+            <Link to="/servicii">
+              Toate Serviciile <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </Button>
         </div>
       </div>
-      
-      {/* Decorațiune Wave (Val) jos - Păstrată din designul original */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 hero-wave opacity-100"></div>
     </section>
+  );
+};
+
+// Componentă Card
+interface MobileCardProps {
+    to: string;
+    icon: React.ReactNode;
+    title: string;
+    subtitle: string;
+    color: 'blue' | 'indigo' | 'emerald' | 'amber';
+}
+
+const MobileActionCard = ({ to, icon, title, subtitle, color }: MobileCardProps) => {
+  const theme = {
+    blue: "text-blue-600 bg-blue-50 border-blue-200 group-hover:bg-blue-600 group-hover:text-white",
+    indigo: "text-indigo-600 bg-indigo-50 border-indigo-200 group-hover:bg-indigo-600 group-hover:text-white",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white",
+    amber: "text-amber-600 bg-amber-50 border-amber-200 group-hover:bg-amber-600 group-hover:text-white",
+  };
+
+  return (
+    <Link 
+      to={to} 
+      className="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 shadow-lg shadow-slate-200/50 active:scale-95 active:shadow-inner transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-slate-200"
+    >
+      <div className={`p-3 rounded-xl mb-2 sm:mb-3 transition-colors duration-300 ${theme[color]}`}>
+        {icon}
+      </div>
+      <h3 className="text-sm sm:text-lg font-bold text-slate-800 leading-tight text-center group-hover:text-slate-900">{title}</h3>
+      <p className="text-[10px] sm:text-sm font-medium text-slate-500 text-center leading-tight mt-0.5">{subtitle}</p>
+    </Link>
   );
 };
 

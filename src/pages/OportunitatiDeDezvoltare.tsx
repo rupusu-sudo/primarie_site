@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import emailjs from '@emailjs/browser';
 import { useAuth } from "@/components/AuthContext";
-import { supabase } from "@/supabase";
-import { Link } from "react-router-dom"; // <--- Import necesar pentru link-uri
+import { Link } from "react-router-dom"; 
 import { 
   TrendingUp, Building2, MapPin, Plus, Upload, Trash2, Mail, Globe, 
   Briefcase, Wheat, ArrowRight, Wallet, Users, Loader2, ShieldCheck,

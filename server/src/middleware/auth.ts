@@ -1,35 +1,64 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cheie_secreta_primarie_2026';
-export const authorize = (allowedRoles: string[] = []) => {
-    return (req: any, res: Response, next: NextFunction) => {
-        const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1];
 
-        if (!token) {
-            return res.status(401).json({ error: 'Vă rugăm să vă logați.' });
-        }
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        email: string;
+        role: string;
+      };
+    }
+  }
+}
 
-        try {
-            const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'cheie_secreta_primarie_2026');
-            req.user = decoded;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-            // FIX: Normalizăm ambele părți la litere mici pentru comparație
-            if (allowedRoles.length > 0) {
-                const userRole = decoded.role ? decoded.role.toLowerCase() : '';
-                const rolesLowerCase = allowedRoles.map(r => r.toLowerCase());
 
-                if (!rolesLowerCase.includes(userRole)) {
-                    return res.status(403).json({
-                        error: `Acces interzis. Nu aveți rolul necesar.`
-                    });
-                }
-            }
+export const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-            next();
-        } catch (err) {
-            return res.status(403).json({ error: 'Sesiune nevalidă sau expirată.' });
-        }
-    };
+    if (!token) {
+      res.status(401).json({ message: 'Token de autentificare lipsă' });
+      return;
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        res.status(403).json({ message: 'Token invalid sau expirat' });
+        return;
+      }
+
+      req.user = decoded as {
+        id: string;
+        email: string;
+        role: string;
+      };
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Eroare la autentificare' });
+  }
 };
+
+
+export const authorizeRole = (roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    next();
+  };
+};
+
+export const requireAdmin = authorizeRole(['admin']);
+
+export const requireEditor = authorizeRole(['admin', 'editor']);

@@ -1,263 +1,272 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
-  Menu, ChevronDown, MessageSquare, Lock, LogOut, 
-  Phone, Mail, Home, Landmark, 
-  FileSearch, ClipboardList, Laptop, Bell, Headset,
-  TrendingUp, ShieldCheck
+  Menu, Phone, ChevronDown, LogOut, 
+  MessageCircle, User, Map, ChevronRight, X, // Am adăugat MessageCircle
+  CreditCard, FileText, Megaphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/components/AuthContext"; 
+import { useAuth } from "@/components/AuthContext";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
+import { NAVIGATION_ITEMS } from "@/config/navigation";
+import { useSwipe } from "@/hooks/use-swipe";
 
 const Header = () => {
-  // Extragem starea de autentificare și funcția de logout
-  const { user, logout, isAdmin } = useAuth(); 
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useSwipe({
+    onSwipeLeft: () => setIsMobileMenuOpen(true),
+    onSwipeRight: () => setIsMobileMenuOpen(false),
+  });
 
   useEffect(() => {
-    let rafId: number | null = null;
-    const handleScroll = () => {
-      if (rafId) return;
-      rafId = window.requestAnimationFrame(() => {
-        const scrollTop = window.scrollY;
-        if (scrollTop > 20 && !isScrolled) {
-            setIsScrolled(true);
-        } else if (scrollTop <= 20 && isScrolled) {
-            setIsScrolled(false);
-        }
-        rafId = null;
-      });
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-        window.removeEventListener("scroll", handleScroll);
-        if (rafId) window.cancelAnimationFrame(rafId);
-    };
-  }, [isScrolled]);
-
-  const navLinks = [
-    { name: "Acasă", href: "/", icon: <Home className="w-3.5 h-3.5" /> },
-    { name: "Vocea Almăjului", href: "/vocea-almajului", icon: <MessageSquare className="w-3.5 h-3.5" />, highlight: true },
-    { 
-      name: "Primăria", 
-      href: "/primaria",
-      icon: <Landmark className="w-3.5 h-3.5" />,
-      submenu: [
-        { name: "Primar", href: "/primar" },
-        { name: "Viceprimar", href: "/viceprimar" },
-        { name: "Secretar General", href: "/secretar" },
-        { name: "Consiliul Local", href: "/consiliul-local" },
-        { name: "Organigramă", href: "/organigrama" },
-      ]
-    },
-    {
-      name: "Transparență",
-      href: "/transparenta",
-      icon: <FileSearch className="w-3.5 h-3.5" />,
-      submenu: [
-        { name: "Hotărâri Consiliu (HCL)", href: "/transparenta/hcl" },
-        { name: "Achiziții Publice", href: "/transparenta/achizitii" },
-        { name: "Buget Local", href: "/transparenta/buget" },
-        { name: "Cariere Publice", href: "/transparenta/cariere" },
-        { name: "Contracte", href: "/transparenta/contracte" },
-      ]
-    },
-    { 
-      name: "Monitor Oficial", 
-      href: "/monitorul-oficial",
-      icon: <ClipboardList className="w-3.5 h-3.5" />,
-      submenu: [
-        { name: "Regulamente", href: "/monitorul-oficial/regulamente" },
-        { name: "Declarații Avere", href: "/monitorul-oficial/declaratii" },
-        { name: "Dispoziții Primar", href: "/monitorul-oficial/dispozitii" },
-        { name: "Statutul Comunei", href: "/monitorul-oficial/statut" },
-        { name: "Alte Documente", href: "/monitorul-oficial/alte-documente" },
-      ]
-    },
-    { name: "Dezvoltare", href: "/oportunitati", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-    { name: "Anunțuri", href: "/anunturi", icon: <Bell className="w-3.5 h-3.5" /> },
-    { name: "Portal Servicii", href: "/servicii", icon: <Laptop className="w-3.5 h-3.5" /> },
-  ];
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <>
-      {/* 1. TOP BAR */}
-      <div 
-        className={`hidden lg:block bg-slate-50 border-b border-slate-200 py-1.5 px-4 z-[60] relative transform-gpu transition-transform duration-300 ease-in-out ${
-            isScrolled ? '-translate-y-full absolute w-full top-0' : 'translate-y-0 relative'
-        }`}
-      >
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <a href="tel:0251449234" className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-sm hover:border-blue-400 transition-colors group">
-              <Phone className="w-3 h-3 text-blue-700 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">0251 449 234</span>
-            </a>
-            <a href="mailto:primariaalmaj@gmail.com" className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-sm hover:border-blue-400 transition-colors group">
-              <Mail className="w-3 h-3 text-blue-700 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Email Primărie</span>
-            </a>
+    <header 
+      className={`
+        sticky top-0 z-50 w-full transition-all duration-300 ease-out border-b
+        ${isScrolled 
+          ? 'bg-white/95 backdrop-blur-md border-slate-200 shadow-md py-2' 
+          : 'bg-white border-transparent py-3 lg:py-4'}
+      `}
+    >
+      <div className="container mx-auto px-4 lg:px-6 flex items-center justify-between gap-2 lg:gap-6">
+        
+        {/* --- LOGO --- */}
+        <Link to="/" className="group flex items-center gap-3 shrink-0 relative z-50 mr-2">
+          <img 
+            src="/flavicon.png" 
+            alt="Stema Almăj" 
+            className={`transition-all duration-500 object-contain drop-shadow-sm ${isScrolled ? 'h-10 w-10' : 'h-12 w-12'}`} 
+          />
+          <div className="flex flex-col leading-none">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">Primăria</span>
+            <span className={`font-black text-slate-900 uppercase tracking-tighter transition-all duration-500 ${isScrolled ? 'text-lg' : 'text-2xl'}`}>
+              Almăj
+            </span>
           </div>
+        </Link>
 
-          <div className="flex items-center gap-3">
-            <Link to="/contact" className="flex items-center gap-1.5 bg-white border border-slate-200 px-4 py-1 rounded-full text-[10px] font-black text-slate-600 uppercase tracking-wider hover:border-blue-600 hover:text-blue-700 transition-colors shadow-sm">
-              <Headset className="w-3 h-3 text-blue-700" /> Contact
-            </Link>
+        {/* --- NAVIGAȚIE DESKTOP --- */}
+        <nav className="hidden xl:flex items-center justify-center flex-1">
+          <div className="flex items-center gap-1 bg-slate-50 p-1.5 rounded-full border border-slate-100 shadow-sm">
+            {NAVIGATION_ITEMS.map((item) => {
+              const isActive = location.pathname.startsWith(item.href) && item.href !== "/";
+              if (item.children) {
+                return (
+                  <DropdownMenu key={item.label}>
+                    <DropdownMenuTrigger className={`flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 outline-none select-none ${isActive ? 'text-blue-700 bg-white shadow-sm ring-1 ring-slate-100' : 'text-slate-600 hover:text-blue-600 hover:bg-white/60'}`}>
+                      {item.label}
+                      <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-64 p-2 rounded-2xl shadow-xl border-slate-100 bg-white/95 backdrop-blur-xl animate-in fade-in zoom-in-95 mt-2">
+                      {item.children.map((child) => (
+                        <DropdownMenuItem key={child.label} asChild>
+                          <Link to={child.href} className="cursor-pointer rounded-xl font-medium text-slate-600 focus:text-blue-700 focus:bg-blue-50 py-2.5 px-3 flex items-center gap-3 group">
+                            {child.icon && <child.icon className="w-4 h-4 text-slate-400 group-hover:text-blue-500" />}
+                            <span className="flex-1">{child.label}</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+              return (
+                <Link key={item.label} to={item.href} className={`px-5 py-2 text-sm font-bold rounded-full transition-all duration-200 ${isActive ? 'text-blue-700 bg-white shadow-sm ring-1 ring-slate-100' : 'text-slate-600 hover:text-blue-600 hover:bg-white/60'}`}>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
 
-            <div className="w-px h-4 bg-slate-200 mx-1" />
+        {/* --- ACȚIUNI DREAPTA (DOAR VOCEA ALMĂJULUI) --- */}
+        <div className="flex items-center gap-2 shrink-0">
+          
+          {/* Buton Principal: VOCEA ALMĂJULUI (Cu iconiță Chat) */}
+          <Link to="/vocea-almajului" className="hidden lg:flex">
+            <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 px-6 font-bold border-0 transition-all hover:scale-105 active:scale-95">
+              <MessageCircle className="w-4 h-4 mr-2" /> 
+              Vocea Almăjului
+            </Button>
+          </Link>
 
-            {/* LOGICA DE AUTENTIFICARE */}
+          {/* User / Login */}
+          <div className="hidden lg:flex items-center pl-2 ml-1">
             {user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col items-end leading-none">
-                  <span className={`text-[8px] font-black uppercase tracking-widest flex items-center gap-1 ${isAdmin ? 'text-blue-700' : 'text-slate-500'}`}>
-                    {isAdmin && <ShieldCheck className="w-2.5 h-2.5" />}
-                    {isAdmin ? 'Mod Administrator' : 'Utilizator Logat'}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-800">{user.name}</span>
-                </div>
-                <button 
-                  onClick={logout} 
-                  className="flex items-center gap-1.5 bg-red-50 border border-red-100 px-4 py-1 rounded-full text-[10px] font-black text-red-600 uppercase tracking-wider hover:bg-red-600 hover:text-white transition-colors shadow-sm active:scale-95"
-                >
-                  <LogOut className="w-3 h-3" /> Ieșire
-                </button>
-              </div>
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="rounded-full w-10 h-10 p-0 border border-slate-200 hover:border-blue-300 transition-all">
+                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center font-bold text-blue-700 text-sm">
+                      {user.name.charAt(0)}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl border-slate-100 p-2">
+                  <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer p-2.5 rounded-xl font-medium focus:bg-red-50">
+                    <LogOut className="w-4 h-4 mr-2" /> Deconectare
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+               </DropdownMenu>
             ) : (
-              <Link to="/login-admin" className="flex items-center gap-1.5 bg-blue-800 px-4 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-wider hover:bg-slate-900 transition-colors shadow-md active:scale-95">
-                <Lock className="w-3 h-3" /> Autentificare
+              <Link to="/login-admin">
+                <Button variant="ghost" size="icon" className="rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50">
+                  <User className="w-5 h-5" />
+                </Button>
               </Link>
             )}
           </div>
+
+          {/* Mobile Menu Trigger */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="xl:hidden text-slate-800 hover:bg-slate-100 rounded-full w-11 h-11 active:scale-90 transition-transform">
+                <Menu className="w-7 h-7" />
+              </Button>
+            </SheetTrigger>
+            
+            <SheetContent side="right" className="w-full sm:w-[400px] p-0 border-l border-slate-100 shadow-2xl z-[100] flex flex-col bg-slate-50">
+              
+              <div className="px-6 pt-6 pb-2 bg-white rounded-b-[2rem] shadow-sm z-10">
+                <div className="flex items-center justify-between mb-6">
+                  {user ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg font-bold border-2 border-blue-50">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 leading-tight">Salut, {user.name}!</p>
+                        <p className="text-xs text-slate-500">Cetățean conectat</p>
+                      </div>
+                    </div>
+                  ) : (
+                     <div className="flex items-center gap-3">
+                       <img src="/flavicon.png" alt="Logo" className="w-10 h-10 object-contain" />
+                       <div>
+                         <p className="font-bold text-slate-900 leading-tight">Meniu Principal</p>
+                         <p className="text-xs text-slate-500 font-bold text-blue-600">Comuna Almăj</p>
+                       </div>
+                     </div>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} className="rounded-full hover:bg-slate-100">
+                    <X className="w-6 h-6 text-slate-500" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <MobileGridButton 
+                    to="/vocea-almajului" 
+                    icon={<MessageCircle className="w-5 h-5 text-indigo-600" />} 
+                    label="Vocea Almăjului" 
+                    bgColor="bg-indigo-50" 
+                    textColor="text-slate-800"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileGridButton 
+                    to="/harta" 
+                    icon={<Map className="w-5 h-5 text-indigo-600" />} 
+                    label="GeoPortal Cadastral" 
+                    bgColor="bg-indigo-50"  
+                    textColor="text-slate-800"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">Navigare</p>
+                {NAVIGATION_ITEMS.map((item, idx) => (
+                  <div key={idx} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    {item.children ? (
+                      <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value={`item-${idx}`} className="border-none">
+                          <AccordionTrigger className="py-4 px-4 hover:no-underline hover:bg-slate-50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600`}>
+                                {item.icon && <item.icon className="w-5 h-5" />}
+                              </div>
+                              <span className="font-bold text-slate-800 text-base">{item.label}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-0">
+                            <div className="flex flex-col border-t border-slate-100">
+                              {item.children.map((child) => (
+                                <Link 
+                                  key={child.label}
+                                  to={child.href} 
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="py-3.5 px-4 pl-16 text-sm font-medium text-slate-600 hover:text-blue-700 hover:bg-slate-50 flex items-center justify-between border-b border-slate-50 last:border-0"
+                                >
+                                  {child.label}
+                                  <ChevronRight className="w-4 h-4 opacity-30" />
+                                </Link>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    ) : (
+                      <Link 
+                        to={item.href} 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-4 py-4 px-4 hover:bg-slate-50 transition-colors"
+                      >
+                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600`}>
+                           {item.icon && <item.icon className="w-5 h-5" />}
+                         </div>
+                         <span className="font-bold text-slate-800 text-base">{item.label}</span>
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {user && (
+                <div className="p-4 bg-white border-t border-slate-200">
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); }} 
+                    className="w-full rounded-xl py-6 font-bold"
+                  >
+                    <LogOut className="w-5 h-5 mr-2" /> Deconectare
+                  </Button>
+                </div>
+              )}
+
+            </SheetContent>
+          </Sheet>
+
         </div>
       </div>
-
-      {/* 2. MAIN HEADER */}
-      <header 
-        className={`sticky top-0 left-0 right-0 z-50 transform-gpu backface-invisible will-change-transform transition-all duration-300 ease-out ${
-          isScrolled 
-            ? "bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 py-2 border-b border-slate-100" 
-            : "bg-white py-5 border-b border-slate-100/50"
-        }`}
-      >
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-4 group">
-            <img 
-              src="/flavicon.png" 
-              alt="Stema" 
-              className={`transition-all duration-300 origin-left ${isScrolled ? "h-9 scale-95" : "h-12 scale-100"} group-hover:scale-105`} 
-            />
-            <div className="flex flex-col">
-              <h1 className={`font-black text-slate-900 leading-none tracking-tighter uppercase transition-all duration-300 origin-left ${isScrolled ? "text-base scale-95" : "text-xl scale-100"}`}>
-                Primăria <span className="text-blue-700">Almăj</span>
-              </h1>
-              <span className={`text-[9px] font-bold text-slate-400 uppercase tracking-[0.4em] mt-1 transition-all duration-300 ${isScrolled ? "opacity-0 h-0 overflow-hidden" : "opacity-100 h-auto"}`}>
-                Administrație Publică
-              </span>
-            </div>
-          </Link>
-
-          <nav className="hidden xl:flex items-center gap-1">
-            {navLinks.map((link) => (
-              link.submenu ? (
-                <DropdownMenu key={link.name}>
-                  <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 text-[11px] font-black text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors uppercase tracking-tight outline-none group">
-                    <span className="text-blue-700 opacity-80 group-hover:opacity-100">{link.icon}</span>
-                    {link.name} <ChevronDown className="w-3 h-3 opacity-30 group-hover:rotate-180 transition-transform duration-300" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="w-64 p-3 border-slate-100 rounded-2xl shadow-2xl">
-                    {link.submenu.map((sub) => (
-                      <DropdownMenuItem key={sub.name} asChild>
-                        <Link to={sub.href} className="cursor-pointer font-bold text-slate-600 focus:text-blue-800 focus:bg-blue-50 py-2.5 rounded-xl text-xs transition-colors">
-                          {sub.name}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Link 
-                  key={link.name} 
-                  to={link.href} 
-                  className={`flex items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-tight transition-all duration-200 rounded-xl ${
-                    (link as any).highlight 
-                      ? "bg-slate-900 text-white hover:bg-blue-700 hover:shadow-md" 
-                      : location.pathname === link.href 
-                        ? "text-blue-800 bg-blue-50" 
-                        : "text-slate-700 hover:text-blue-800 hover:bg-blue-50"
-                  }`}
-                >
-                  <span className={location.pathname === link.href || (link as any).highlight ? "opacity-100" : "text-blue-700 opacity-80"}>{link.icon}</span>
-                  {link.name}
-                </Link>
-              )
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="xl:hidden">
-                <Button variant="ghost" size="icon" className="rounded-xl bg-slate-50 hover:bg-blue-50">
-                  <Menu className="w-6 h-6 text-slate-900" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] p-0 border-none shadow-2xl flex flex-col h-full bg-white z-[100]">
-                <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6 text-white shrink-0 min-h-[140px] flex flex-col justify-end">
-                    <h2 className="text-2xl font-bold uppercase tracking-tight">Meniul Comunei</h2>
-                    <p className="text-blue-200/90 text-[10px] font-medium uppercase tracking-wider mt-1">Instituția Primarului Almăj</p>
-                </div>
-                <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col gap-1">
-                  {navLinks.map((link, index) => (
-                    <div key={link.name}>
-                      {link.submenu ? (
-                        <Accordion type="single" collapsible className="w-full">
-                           <AccordionItem value={`item-${index}`} className="border-none">
-                             <AccordionTrigger className="py-3 text-base font-black uppercase text-slate-800 hover:text-blue-800 px-2 rounded-lg data-[state=open]:bg-blue-50">
-                                <div className="flex items-center gap-3">{link.icon} <span>{link.name}</span></div>
-                             </AccordionTrigger>
-                             <AccordionContent className="pb-0 pt-1 px-2">
-                                <div className="flex flex-col border-l-2 border-blue-100 ml-3 pl-4 py-2 gap-2">
-                                  {link.submenu.map(sub => (
-                                    <Link key={sub.name} to={sub.href} onClick={() => setIsOpen(false)} className="py-2 text-sm font-bold text-slate-600 hover:text-blue-700">
-                                      {sub.name}
-                                    </Link>
-                                  ))}
-                                </div>
-                             </AccordionContent>
-                           </AccordionItem>
-                        </Accordion>
-                      ) : (
-                        <Link 
-                          to={link.href} 
-                          onClick={() => setIsOpen(false)} 
-                          className={`flex items-center gap-3 py-3 px-3 text-base font-semibold uppercase rounded-xl transition-all ${
-                            (link as any).highlight 
-                              ? "bg-slate-900 text-white hover:bg-blue-700" 
-                              : "text-slate-800 hover:text-blue-800 hover:bg-blue-50"
-                          }`}
-                        >
-                          {link.icon} <span>{link.name}</span>
-                        </Link>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </header>
-    </>
+    </header>
   );
 };
+
+const MobileGridButton = ({ to, icon, label, bgColor, textColor, onClick }: any) => (
+  <Link to={to} onClick={onClick} className={`flex flex-col items-center justify-center p-3 rounded-2xl ${bgColor} active:scale-95 transition-transform h-24 shadow-sm border border-black/5`}>
+    <div className="mb-2">{icon}</div>
+    <span className={`text-xs font-bold ${textColor}`}>{label}</span>
+  </Link>
+);
 
 export default Header;

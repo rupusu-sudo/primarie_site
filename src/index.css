@@ -171,3 +171,8 @@
     text-wrap: balance;
   }
 }
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900; /* Fundal general mai soft decât albul pur */
+  }
+}
