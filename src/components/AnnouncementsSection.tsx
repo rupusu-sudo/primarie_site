@@ -43,8 +43,6 @@ const AnnouncementsSection = () => {
   
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  
-  // Stări pentru auto-scroll (activ doar pe mobil, practic)
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -55,16 +53,13 @@ const AnnouncementsSection = () => {
       const data = await response.json();
       
       if (Array.isArray(data) && data.length > 0) {
-        // Sortăm descrescător după dată
         const sorted = data.sort((a: Announcement, b: Announcement) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-        
-        // --- MODIFICARE: Luăm primele 9 anunțuri în loc de 3 ---
-        const topRecent = sorted.slice(0, 9);
+        const top3 = sorted.slice(0, 3);
         
         setAnnouncements(prev => {
-            if (JSON.stringify(prev) !== JSON.stringify(topRecent)) return topRecent;
+            if (JSON.stringify(prev) !== JSON.stringify(top3)) return top3;
             return prev;
         });
       } else {
@@ -79,22 +74,16 @@ const AnnouncementsSection = () => {
 
   useEffect(() => {
     fetchAnnouncements(false);
-    // Polling la 15 secunde pentru date noi
-    const interval = setInterval(() => fetchAnnouncements(true), 15000);
+    const interval = setInterval(() => fetchAnnouncements(true), 10000);
     return () => clearInterval(interval);
   }, [fetchAnnouncements]);
 
-  // Auto-scroll logic (Efectiv mai mult pe mobil)
   useEffect(() => {
     if (isInitialLoading || announcements.length === 0 || isPaused) return;
 
     const scrollInterval = setInterval(() => {
-        // Verificăm dacă suntem pe mobil (unde există scroll orizontal)
         if (scrollContainerRef.current) {
             const container = scrollContainerRef.current;
-            // Dacă nu avem scroll (de ex pe Desktop unde e grid), nu facem nimic
-            if (container.scrollWidth <= container.clientWidth) return;
-
             const cardWidth = container.firstElementChild?.clientWidth || 0;
             const gap = 20;
             const nextSlide = (activeSlide + 1) % announcements.length;
@@ -112,7 +101,6 @@ const AnnouncementsSection = () => {
     return () => clearInterval(scrollInterval);
   }, [activeSlide, announcements.length, isPaused, isInitialLoading]);
 
-  // Animații GSAP Header
   useGSAP(() => {
     const tl = gsap.timeline({
         scrollTrigger: {
@@ -127,7 +115,6 @@ const AnnouncementsSection = () => {
       .from(".header-btn", { opacity: 0, x: -10, duration: 0.6, ease: "power2.out" }, "-=0.4");
   }, { scope: containerRef });
 
-  // Animații GSAP Cards
   useGSAP(() => {
     if (isInitialLoading || announcements.length === 0) return;
 
@@ -141,7 +128,7 @@ const AnnouncementsSection = () => {
             y: 40, 
             opacity: 0,
             duration: 0.6,
-            stagger: 0.1, // Stagger mic pentru a apărea frumos în grilă
+            stagger: 0.1, 
             ease: "back.out(1.1)", 
             clearProps: "all" 
         });
@@ -155,7 +142,6 @@ const AnnouncementsSection = () => {
     <section ref={containerRef} className="pt-8 pb-12 md:py-16 bg-white relative z-20 -mt-8 md:-mt-4 overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         
-        {/* --- Header Secțiune --- */}
         <div className="section-header flex flex-col md:flex-row items-start md:items-end justify-between mb-8 gap-6"> 
           
           <div className="max-w-2xl overflow-hidden relative">
@@ -184,9 +170,7 @@ const AnnouncementsSection = () => {
                 <p className="text-slate-500 text-sm font-medium max-w-md leading-relaxed">
                     Rămâneți conectați cu deciziile administrative și noutățile din comunitate, actualizate în timp real.
                 </p>
-                
-                {/* Indicatorii de slide (Doar vizuali, relevanți mai mult pe mobil) */}
-                <div className="flex items-center gap-1 mt-1 md:hidden">
+                <div className="flex items-center gap-1 mt-1">
                     {announcements.map((_, idx) => (
                         <div key={idx} className="h-1 rounded-full transition-all duration-500" 
                              style={{ 
@@ -209,7 +193,6 @@ const AnnouncementsSection = () => {
           </div>
         </div>
 
-        {/* --- Lista Carduri --- */}
         {isInitialLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
         ) : announcements.length === 0 ? (
@@ -222,9 +205,8 @@ const AnnouncementsSection = () => {
             onMouseLeave={() => setIsPaused(false)}
             onTouchStart={() => setIsPaused(true)} 
             ref={scrollContainerRef}
-            // PE DESKTOP (md:): Grid cu 3 coloane
-            // PE MOBIL: Flex cu scroll orizontal
-            className="cards-container flex md:grid md:grid-cols-3 gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory touch-pan-x pb-8 -mx-4 px-4 md:pb-0 md:mx-0 md:px-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            // MODIFICARE AICI: Am adaugat clasele pentru ascunderea scrollbar-ului
+            className="cards-container flex md:grid md:grid-cols-3 gap-5 overflow-x-auto snap-x snap-mandatory touch-pan-x pb-8 -mx-4 px-4 md:pb-0 md:mx-0 md:px-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {announcements.map((announcement) => (
               <Link 
@@ -232,7 +214,6 @@ const AnnouncementsSection = () => {
                 to="/anunturi" 
                 className="announcement-card min-w-[85vw] md:min-w-0 snap-center group flex flex-col bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-lg transition-all duration-300 relative overflow-hidden h-full"
               >
-                {/* Linie colorată sus */}
                 <div className={cn("absolute top-0 left-0 w-full h-1 transition-all duration-300", 
                     announcement.category === 'Urgent' ? "bg-red-500" : "bg-blue-500 group-hover:h-1.5"
                 )}></div>
