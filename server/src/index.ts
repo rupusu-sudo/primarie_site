@@ -155,9 +155,19 @@ transporter.verify((error, success) => {
 // ============================================================================
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    destination: (
+        req: Request,
+        file: Express.Multer.File,
+        cb: (error: Error | null, destination: string) => void
+    ) => {
+        cb(null, uploadDir);
+    },
+    filename: (
+        req: Request,
+        file: Express.Multer.File,
+        cb: (error: Error | null, filename: string) => void
+    ) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
