@@ -185,20 +185,29 @@ logger.success(`Multer upload configurat`, { module: 'BOOT', details: { maxSize:
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
+// CORS cu whitelist + wildcard Vercel și accept fără origine (Postman/mobile)
 const allowedOrigins = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://primarie-site-ceva.vercel.app'
+    'https://primarie-site-ceva.vercel.app',
+    'https://primarie-site-ceva.vercel.app/'
 ];
 
 app.use(cors({ 
-    origin: allowedOrigins, 
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true); // permite unelte fără Origin
+        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        logger.warn(`CORS blocat pentru originea: ${origin}`, { module: 'SECURITY' });
+        return callback(new Error('Not allowed by CORS'));
+    }, 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, credentials: true } });
+logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, wildcard: '*.vercel.app', credentials: true } });
 
 app.use(express.json());
 app.use('/uploads', express.static(uploadDir));
