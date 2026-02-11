@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  Menu, Phone, ChevronDown, LogOut, 
-  MessageCircle, User, Map, ChevronRight, X, 
+import {
+  Menu, Phone, ChevronDown, LogOut,
+  MessageCircle, User, Map, ChevronRight, X,
   CreditCard, FileText, Megaphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/accordion";
 import { NAVIGATION_ITEMS } from "@/config/navigation";
 import { useSwipe } from "@/hooks/use-swipe";
+import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -100,6 +101,10 @@ const Header = () => {
           </div>
         </nav>
         <div className="flex items-center gap-2 shrink-0">
+          {/* A11y trigger desktop lângă Vocea Almăjului */}
+          <div className="hidden lg:flex">
+            <AccessibilityWidget mode="header" align="left" triggerClassName="mr-1" />
+          </div>
           <Link to="/vocea-almajului" className="hidden lg:flex">
             <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 px-6 font-bold border-0 transition-all hover:scale-105 active:scale-95">
               <MessageCircle className="w-4 h-4 mr-2" /> 
@@ -130,6 +135,11 @@ const Header = () => {
                 </Button>
               </Link>
             )}
+          </div>
+
+          {/* Mobile A11y trigger (stânga hamburger) */}
+          <div className="xl:hidden">
+            <AccessibilityWidget mode="header" align="left" triggerClassName="w-11 h-11 mr-1" />
           </div>
 
           {/* Mobile Menu Trigger */}

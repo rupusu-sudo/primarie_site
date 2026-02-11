@@ -24,7 +24,7 @@ interface Announcement {
 
 type SortOption = 'newest' | 'oldest' | 'urgent';
 
-const useIdlePolling = (callback: () => Promise<void>, intervalMs: number = 15000, idleThresholdMs: number = 5000) => {
+const useIdlePolling = (callback: () => Promise<void>, intervalMs: number = 30 * 60 * 1000, idleThresholdMs: number = 5000) => {
   const savedCallback = useRef(callback);
   const lastActivityRef = useRef(Date.now());
 

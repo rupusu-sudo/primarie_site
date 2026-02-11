@@ -1,7 +1,6 @@
 import HeroSection from "@/components/HeroSection";
 import AnnouncementsSection from "@/components/AnnouncementsSection";
 import AboutSection from "@/components/AboutSection";
-import LeadershipSection from "@/components/LeadershipSection";
 
 const Index = () => {
   return (
@@ -22,9 +21,6 @@ const Index = () => {
           <AboutSection />
         </div>
       </section>
-
-      {/* 4. CONDUCEREA */}
-      <LeadershipSection />
     </div>
   );
 };

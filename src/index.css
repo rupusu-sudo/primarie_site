@@ -1,7 +1,6 @@
-/* 1. Regula @import TREBUIE să fie prima linie din fișier */
+﻿/* 1. Regula @import TREBUIE sÄƒ fie prima linie din fiÈ™ier */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-/* 2. Directivele Tailwind urmează după importuri */
+/* 2. Directivele Tailwind urmeazÄƒ dupÄƒ importuri */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -171,8 +170,139 @@
     text-wrap: balance;
   }
 }
+
+/* Accessibility toggles */
+html[data-font="115"] {
+  font-size: 115%;
+}
+html[data-font="130"] {
+  font-size: 130%;
+}
+
+html[data-contrast="on"] body {
+  background-color: #0b1220;
+  color: #f8fafc;
+}
+html[data-contrast="on"] .card,
+html[data-contrast="on"] [class*="bg-white"],
+html[data-contrast="on"] .bg-slate-50 {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #cbd5f5 !important;
+}
+html[data-contrast="on"] .text-slate-600,
+html[data-contrast="on"] .text-slate-500,
+html[data-contrast="on"] .text-slate-400 {
+  color: #e2e8f0 !important;
+}
+html[data-contrast="on"] .text-slate-700 {
+  color: #f1f5f9 !important;
+}
+html[data-contrast="on"] .text-blue-700,
+html[data-contrast="on"] .text-blue-600,
+html[data-contrast="on"] .text-blue-500 {
+  color: #bfdbfe !important;
+}
+
+html[data-motion="reduce"] * {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 120ms !important;
+}
+
+/* About coverflow carousel */
+.about-coverflow {
+  position: relative;
+  width: min(640px, 96vw);
+  margin: 0 auto;
+}
+
+.coverflow-viewport {
+  position: relative;
+  height: clamp(260px, 38vw, 360px);
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.coverflow-card-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform:
+    translateX(calc(var(--offset) * 16%))
+    translateZ(calc(var(--abs-offset) * -140px))
+    rotateY(calc(var(--offset) * 18deg));
+  filter: blur(calc(var(--abs-offset) * 1.4px));
+  z-index: calc(100 - var(--abs-offset) * 10);
+  opacity: calc(1 - (var(--abs-offset) * 0.18));
+  transition: transform 0.45s ease, filter 0.35s ease, z-index 0.35s ease, opacity 0.35s ease;
+}
+
+.coverflow-card {
+  width: clamp(200px, 26vw, 260px);
+  height: 100%;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8f0ff, #ffffff);
+  box-shadow: 0 18px 60px -28px rgba(15, 23, 42, 0.35);
+  transform: translateY(calc(var(--abs-offset) * 6px));
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.coverflow-card.active {
+  transform: translateY(0) scale(1.06);
+  box-shadow: 0 22px 80px -30px rgba(15, 23, 42, 0.4);
+}
+
+.coverflow-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverflow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.coverflow-nav:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 14px 40px -20px rgba(15, 23, 42, 0.55);
+  color: #1d4ed8;
+}
+
+.coverflow-nav.left {
+  left: -56px;
+}
+
+.coverflow-nav.right {
+  right: -56px;
+}
+
+@media (max-width: 768px) {
+  .coverflow-nav.left {
+    left: -8px;
+  }
+  .coverflow-nav.right {
+    right: -8px;
+  }
+}
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900; /* Fundal general mai soft decât albul pur */
+    @apply bg-slate-50 text-slate-900; /* Fundal general mai soft decÃ¢t albul pur */
   }
 }

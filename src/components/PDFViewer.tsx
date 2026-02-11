@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 interface PDFViewerProps {
   url: string;
   className?: string;
-  onClose?: () => void; // Primim funcția de închidere
+  onClose?: () => void; 
 }
 
 const PDFViewer = ({ url, className = "", onClose }: PDFViewerProps) => {

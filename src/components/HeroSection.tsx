@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React, { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { CreditCard, FileText, Building2, Bell, ChevronRight, ArrowUpRight } from "lucide-react";
@@ -52,10 +52,10 @@ const HeroSection = () => {
     <section 
       ref={containerRef} 
       // --- FIX AICI ---
-      // 1. pt-20: Pe mobil avem padding mai mic (80px), suficient cât să treacă de navbar.
-      // 2. md:pt-32: Pe desktop păstrăm spațiul aerisit.
+      // 1. pt-20: Pe mobil avem padding mai mic (80px), suficient cÃ¢t sÄƒ treacÄƒ de navbar.
+      // 2. md:pt-32: Pe desktop pÄƒstrÄƒm spaÈ›iul aerisit.
       // 3. pb-12 md:pb-12: Padding jos consistent.
-      className="relative w-full min-h-[auto] lg:min-h-[700px] flex flex-col justify-center items-center overflow-hidden bg-slate-50 pt-20 md:pt-32 pb-12"
+      className="relative w-full min-h-[auto] lg:min-h-[700px] flex flex-col justify-center items-center overflow-hidden bg-slate-50 pt-14 md:pt-24 pb-12"
     >
       
       {/* --- STRAT 1: FUNDAL --- */}
@@ -63,13 +63,13 @@ const HeroSection = () => {
         <div ref={bgImageRef} className="absolute inset-0 w-full h-full">
           <img 
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop" 
-            alt="Peisaj Almăj" 
+            alt="Peisaj AlmÄƒj" 
 
             className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-white/80"></div>
           
-          {/* Fade Out în Alb Pur */}
+          {/* Fade Out Ã®n Alb Pur */}
           <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
         </div>
 
@@ -78,7 +78,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* --- STRAT 2: CONȚINUT --- */}
+      {/* --- STRAT 2: CONÈšINUT --- */}
       <div className="content-layer relative z-10 container mx-auto px-4 flex flex-col items-center text-center">
         
         {/* Badge */}
@@ -112,7 +112,7 @@ const HeroSection = () => {
 
         {/* Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl mb-12">
-          <ModernCard to="/servicii/taxe" icon={<CreditCard />} title="Taxe" subtitle="Plătește Online" accent="blue" />
+          <ModernCard to="/servicii/taxe" icon={<CreditCard />} title="Taxe" subtitle="Plată Online" accent="blue" />
           <ModernCard to="/monitorul-oficial" icon={<FileText />} title="Acte" subtitle="Monitor Oficial" accent="indigo" />
           <ModernCard to="/servicii/urbanism" icon={<Building2 />} title="Urbanism" subtitle="Autorizații" accent="emerald" />
           <ModernCard to="/anunturi" icon={<Bell />} title="Avizier" subtitle="Noutăți" accent="amber" />

@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./components/AuthContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { AccessibilityProvider } from "./components/AccessibilityProvider";
 
 const queryClient = new QueryClient();
 
@@ -18,10 +19,10 @@ const queryClient = new QueryClient();
  * Astfel, LoadingScreen-ul nu va mai "pâlpâi" rapid.
  */
 const lazyWithDelay = (importFn: () => Promise<any>, delay = 800) => {
-  return lazy(() => 
+  return lazy(() =>
     Promise.all([
       importFn(),
-      new Promise(resolve => setTimeout(resolve, delay))
+      new Promise((resolve) => setTimeout(resolve, delay)),
     ]).then(([moduleExports]) => moduleExports)
   );
 };
@@ -41,7 +42,7 @@ const OportunitatiDeDezvoltare = lazyWithDelay(() => import("./pages/Oportunitat
 const LoginAdmin = lazyWithDelay(() => import("./pages/LoginAdmin"));
 const NotFound = lazyWithDelay(() => import("./pages/NotFound"));
 
-// --- CONDUCERE & EXECUTIV (AICI SUNT MODIFICĂRILE TALE) ---
+// --- CONDUCERE & EXECUTIV ---
 const Primar = lazyWithDelay(() => import("./pages/Primar"));
 const Viceprimar = lazyWithDelay(() => import("./pages/Viceprimar"));
 const Secretar = lazyWithDelay(() => import("./pages/Secretar"));
@@ -75,31 +76,31 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Toaster />
-          <Sonner />
-          
-          <Header />
+        <AccessibilityProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Toaster />
+            <Sonner />
 
-          <Suspense fallback={<LoadingScreen />}>
-            <main className="min-h-screen">
-              <Routes>
+            <Header />
+
+            <Suspense fallback={<LoadingScreen />}>
+              <main className="min-h-screen">
+                <Routes>
                 {/* Rute Principale */}
                 <Route path="/" element={<Index />} />
                 <Route path="/harta-digitala" element={<HartaDigitala />} />
-                
+
                 {/* Instituție */}
                 <Route path="/primaria" element={<Primaria />} />
                 <Route path="/consiliul-local" element={<ConsiliulLocal />} />
                 <Route path="/organigrama" element={<Organigrama />} />
-                
-                {/* --- RUTELE PENTRU PRIMAR, VICEPRIMAR, SECRETAR --- */}
-                {/* Aceste rute trebuie să corespundă cu link-urile din meniu/site */}
+
+                {/* Conducere */}
                 <Route path="/primaria/primar" element={<Primar />} />
                 <Route path="/primaria/viceprimar" element={<Viceprimar />} />
                 <Route path="/primaria/secretar-general" element={<Secretar />} />
-                
+
                 {/* Informații */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/istoric" element={<Istoric />} />
@@ -109,16 +110,16 @@ const App = () => (
                 <Route path="/vocea-almajului" element={<VoceaAlmajului />} />
                 <Route path="/oportunitati" element={<OportunitatiDeDezvoltare />} />
                 <Route path="/login" element={<LoginAdmin />} />
-                
-                {/* Rute Monitor Oficial */}
+
+                {/* Monitor Oficial */}
                 <Route path="/monitorul-oficial" element={<MonitorulOficial />} />
                 <Route path="/monitorul-oficial/dispozitii" element={<Dispozitii />} />
                 <Route path="/monitorul-oficial/declaratii" element={<Declaratii />} />
                 <Route path="/monitorul-oficial/regulamente" element={<Regulamente />} />
                 <Route path="/monitorul-oficial/statut" element={<Statut />} />
                 <Route path="/monitorul-oficial/alte-documente" element={<AlteDocumente />} />
-                
-                {/* Rute Transparență */}
+
+                {/* Transparență */}
                 <Route path="/transparenta" element={<Transparenta />} />
                 <Route path="/transparenta/hcl" element={<HCL />} />
                 <Route path="/transparenta/buget" element={<Buget />} />
@@ -126,7 +127,7 @@ const App = () => (
                 <Route path="/transparenta/contracte" element={<Contracte />} />
                 <Route path="/transparenta/cariere" element={<Cariere />} />
 
-                {/* Rute Servicii */}
+                {/* Servicii */}
                 <Route path="/servicii" element={<Servicii />} />
                 <Route path="/servicii/taxe" element={<Taxe />} />
                 <Route path="/servicii/urbanism" element={<Urbanism />} />
@@ -143,6 +144,7 @@ const App = () => (
 
           <Footer />
         </BrowserRouter>
+        </AccessibilityProvider>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
