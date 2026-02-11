@@ -11,6 +11,7 @@ import L from 'leaflet';
 import area from '@turf/area';
 import { toast } from 'sonner';
 import { useAuth } from "@/components/AuthContext"; // Importă noul context
+import { API_URL } from "@/config/api";
 
 // --- CONFIGURARE ICONIȚE LEAFLET ---
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -71,7 +72,7 @@ const HartaDigitala = () => {
 
   const fetchTerenuri = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/terenuri');
+      const response = await fetch(`${API_URL}/api/terenuri`);
       const data = await response.json();
       
       const processedData = data?.map((item: any) => ({
@@ -99,7 +100,7 @@ const HartaDigitala = () => {
           ];
           const newGeoJson = { type: "Polygon", coordinates };
 
-          const response = await fetch('http://localhost:3001/api/terenuri', {
+          const response = await fetch(`${API_URL}/api/terenuri`, {
               method: 'POST',
               headers: { 
                   'Content-Type': 'application/json',
@@ -127,7 +128,7 @@ const HartaDigitala = () => {
       if (!confirm("Ești sigur?")) return;
 
       try {
-          const response = await fetch(`http://localhost:3001/api/terenuri/${id}`, {
+          const response = await fetch(`${API_URL}/api/terenuri/${id}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${token}` }
           });

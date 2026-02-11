@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { Lock, Mail, Loader2, ShieldCheck, CheckCircle2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthContext";
 import { cn } from "@/lib/utils";
-
-const API_URL = 'http://localhost:3001';
+import { API_URL } from "@/config/api";
 
 interface LoginModalProps {
   isOpen: boolean;

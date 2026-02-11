@@ -175,13 +175,20 @@ logger.success(`Multer upload configurat`, { module: 'BOOT', details: { maxSize:
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://primarie-site-ceva.vercel.app'
+];
+
 app.use(cors({ 
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], 
+    origin: allowedOrigins, 
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: ['localhost:5173'] } });
+logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, credentials: true } });
 
 app.use(express.json());
 app.use('/uploads', express.static(uploadDir));

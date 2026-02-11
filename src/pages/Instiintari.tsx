@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { withApiBase } from "@/config/api";
 
 const categoryTone: Record<Notification["category"], { bg: string; text: string; ring: string }> = {
   Taxe: { bg: "bg-amber-50", text: "text-amber-700", ring: "ring-amber-100" },
@@ -45,10 +46,7 @@ const formatDate = (date: string) =>
     return monthMap[m.toLowerCase()] ?? m;
   })).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
 
-const resolveUrl = (url?: string) => {
-  if (!url) return undefined;
-  return url.startsWith("http") ? url : `http://localhost:3001${url}`;
-};
+const resolveUrl = (url?: string) => withApiBase(url);
 
 const Instiintari = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);

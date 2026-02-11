@@ -12,6 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { API_URL, withApiBase } from "@/config/api";
 
 interface Announcement {
   id: number;
@@ -56,7 +57,7 @@ const FeedCard = ({ item }: { item: Announcement }) => {
     const Icon = isUrgent ? AlertCircle : item.category === 'Cultura' ? Megaphone : FileText;
     const badgeColor = isUrgent ? "bg-red-50 text-red-700 border-red-100" : "bg-blue-50 text-blue-700 border-blue-100";
     
-    const fullUrl = item.fileUrl ? (item.fileUrl.startsWith('http') ? item.fileUrl : `http://localhost:3001${item.fileUrl}`) : null;
+    const fullUrl = withApiBase(item.fileUrl) || null;
 
     const formatDate = (dateString: string) => {
         try {
@@ -111,7 +112,7 @@ export default function Anunturi() {
 
   const fetchAnnouncements = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/announcements');
+      const response = await fetch(`${API_URL}/api/announcements`);
       if (!response.ok) throw new Error("Network error");
       const jsonData = await response.json();
       
@@ -123,7 +124,7 @@ export default function Anunturi() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => { 
     fetchAnnouncements(); 

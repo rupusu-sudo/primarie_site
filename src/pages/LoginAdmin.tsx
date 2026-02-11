@@ -14,8 +14,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/AuthContext";
 import { cn } from "@/lib/utils";
-
-const API_URL = 'http://localhost:3001';
+import { API_URL } from "@/config/api";
 
 const LoginAdmin = () => {
   const [email, setEmail] = useState("");

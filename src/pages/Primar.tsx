@@ -18,6 +18,7 @@ import {
   FileText,
   ArrowRight,
 } from "lucide-react";
+import { API_URL } from "@/config/api";
 
 interface FAQItem {
   question: string;
@@ -122,7 +123,7 @@ const Primar = () => {
     };
     setSubmitting(true);
     try {
-      const res = await fetch("http://localhost:3001/api/contact-primar", {
+      const res = await fetch(`${API_URL}/api/contact-primar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

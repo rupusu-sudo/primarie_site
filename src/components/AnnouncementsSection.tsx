@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { API_URL } from "@/config/api";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -60,7 +61,7 @@ const AnnouncementsSection = () => {
 
   const fetchAnnouncements = useCallback(async (isBackground = false) => {
     try {
-      const response = await fetch("http://localhost:3001/api/announcements");
+      const response = await fetch(`${API_URL}/api/announcements`);
       if (!response.ok) throw new Error("Network error");
 
       const data = await response.json();
@@ -84,7 +85,7 @@ const AnnouncementsSection = () => {
     } finally {
       if (!isBackground) setIsInitialLoading(false);
     }
-  }, []);
+  }, [API_URL]);
 
   // Interval mare pentru a evita spam-ul rețelei: 30 de minute
   const FETCH_INTERVAL = 30 * 60 * 1000;

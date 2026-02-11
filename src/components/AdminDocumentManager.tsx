@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PDFViewer from "@/components/PDFViewer"; 
+import { API_URL } from "@/config/api";
 
 // Tipul documentului conform noii baze de date
 type Document = {
@@ -33,8 +34,6 @@ interface AdminDocumentManagerProps {
   customCategories?: string[];
   retentionYears?: number; 
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const AdminDocumentManager = ({ categoryKey, title, icon: Icon = FileText, enableYearFilter = true, customCategories }: AdminDocumentManagerProps) => {
   const { user, token } = useAuth(); // Luăm userul și token-ul din contextul nou

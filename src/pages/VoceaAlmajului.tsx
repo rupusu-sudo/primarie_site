@@ -19,8 +19,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { API_URL, withApiBase } from "@/config/api";
 
 const getDeviceId = () => {
   let id = localStorage.getItem('almaj_id_v3');
@@ -330,16 +329,20 @@ const VoceaAlmajului = () => {
 
                         {post.image_urls?.length > 0 && (
                           <div className="flex flex-wrap gap-3 mb-8">
-                            {post.image_urls.map((url: string, i: number) => (
-                              <button
-                                key={i}
-                                type="button"
-                                onClick={() => setLightboxImage(`${API_URL}${url}`)}
-                                className="block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl overflow-hidden"
-                              >
-                                <img src={`${API_URL}${url}`} alt={`Atașament ${i + 1}`} className="max-h-48 rounded-2xl object-cover border border-slate-100 shadow-sm hover:shadow-lg transition-shadow cursor-pointer" />
-                              </button>
-                            ))}
+                            {post.image_urls.map((url: string, i: number) => {
+                              const resolvedUrl = withApiBase(url);
+                              if (!resolvedUrl) return null;
+                              return (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => setLightboxImage(resolvedUrl)}
+                                  className="block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl overflow-hidden"
+                                >
+                                  <img src={resolvedUrl} alt={`Atașament ${i + 1}`} className="max-h-48 rounded-2xl object-cover border border-slate-100 shadow-sm hover:shadow-lg transition-shadow cursor-pointer" />
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
 
