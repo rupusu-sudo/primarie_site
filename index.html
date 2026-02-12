@@ -3,15 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/flavicon.png" />
-    <link rel="preload" as="image" href="/assets/about-1.webp" imagesrcset="/assets/about-1.webp 1400w" imagesizes="(max-width: 640px) 100vw, 70vw" />
+    <link rel="preconnect" href="https://primariesite-production.up.railway.app" crossorigin />
+    <link rel="dns-prefetch" href="//primariesite-production.up.railway.app" />
+    <link
+      rel="preload"
+      as="image"
+      href="/hero/hero-1280.avif"
+      imagesrcset="/hero/hero-768.avif 768w, /hero/hero-1280.avif 1280w, /hero/hero-1920.avif 1920w"
+      imagesizes="100vw"
+    />
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+    <meta name="theme-color" content="#ffffff" />
+
     <title>Primăria Comunei Almăj - Portal Cetățeni</title>
     <meta name="description" content="Portal oficial al Primăriei Comunei Almăj, Județul Dolj. Acces la servicii, informații și documente publice pentru cetățeni." />
-    
+
     <script>
-      if (global === undefined) {
-        var global = window;
+      if (typeof global === "undefined") {
+        window.global = window;
       }
     </script>
 
@@ -23,7 +35,6 @@
 
   <body>
     <div id="root"></div>
-    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

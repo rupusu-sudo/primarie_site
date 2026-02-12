@@ -44,13 +44,13 @@ const Header = () => {
   return (
     <header 
       className={`
-        sticky top-0 z-50 w-full transition-all duration-300 ease-out border-b
+        sticky top-0 z-50 w-full h-16 transition-all duration-300 ease-out border-b
         ${isScrolled 
-          ? 'bg-white/95 backdrop-blur-md border-slate-200 shadow-md py-2' 
-          : 'bg-white border-transparent py-3 lg:py-4'}
+          ? 'bg-white/95 backdrop-blur-md border-slate-200 shadow-md' 
+          : 'bg-white border-transparent'}
       `}
     >
-      <div className="container mx-auto px-4 lg:px-6 flex items-center justify-between gap-2 lg:gap-6">
+      <div className="container mx-auto px-4 lg:px-6 h-full flex items-center justify-between gap-2 lg:gap-6">
         
         {/* --- LOGO --- */}
         <Link to="/" className="group flex items-center gap-3 shrink-0 relative z-50 mr-2">
@@ -275,3 +275,4 @@ const MobileGridButton = ({ to, icon, label, bgColor, textColor, onClick }: any)
 );
 
 export default Header;
+
