@@ -11,6 +11,7 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import { JWT_SECRET, IS_EPHEMERAL_JWT_SECRET } from './config/jwtSecret';
 
 // ============================================================================
 // LOGGER PROFESIONAL
@@ -111,14 +112,15 @@ const logger = {
 
 const app = express();
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3001;
 
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-    throw new Error('JWT_SECRET trebuie setat în .env și să aibă minim 32 de caractere.');
-}
-
 logger.info(`Inițializare server...`, { module: 'BOOT' });
+if (IS_EPHEMERAL_JWT_SECRET) {
+    logger.warn(
+        'JWT secret temporar activ. Configurează JWT_SECRET (min 32) în mediul de deploy.',
+        { module: 'BOOT' }
+    );
+}
 
 // ============================================================================
 // CONFIGURARE DIRECTOARE

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/jwtSecret';
 
 
 declare global {
@@ -14,12 +15,6 @@ declare global {
     }
   }
 }
-
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-  throw new Error('JWT_SECRET must be set and at least 32 characters long.');
-}
-
 
 export const authenticateToken = (
   req: Request,
