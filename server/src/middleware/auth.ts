@@ -6,15 +6,19 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string;
-        email: string;
+        id?: string;
+        userId?: number | string;
+        email?: string;
         role: string;
       };
     }
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be set and at least 32 characters long.');
+}
 
 
 export const authenticateToken = (
@@ -52,13 +56,16 @@ export const authenticateToken = (
 
 export const authorizeRole = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const normalizedRole = String(req.user?.role || '').toUpperCase();
+    const normalizedAllowedRoles = roles.map((role) => String(role).toUpperCase());
+
+    if (!normalizedRole || !normalizedAllowedRoles.includes(normalizedRole)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     next();
   };
 };
 
-export const requireAdmin = authorizeRole(['admin']);
+export const requireAdmin = authorizeRole(['ADMIN']);
 
-export const requireEditor = authorizeRole(['admin', 'editor']);
+export const requireEditor = authorizeRole(['ADMIN', 'EDITOR']);

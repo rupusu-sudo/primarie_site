@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -110,8 +111,12 @@ const logger = {
 
 const app = express();
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'cheie_secreta_primarie_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3001;
+
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+    throw new Error('JWT_SECRET trebuie setat în .env și să aibă minim 32 de caractere.');
+}
 
 logger.info(`Inițializare server...`, { module: 'BOOT' });
 
@@ -151,6 +156,64 @@ transporter.verify((error, success) => {
 });
 
 // ============================================================================
+// SECURITY HELPERS
+// ============================================================================
+
+const normalizeOrigin = (origin: string) => origin.replace(/\/+$/, '');
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => normalizeOrigin(origin.trim()))
+    .filter(Boolean);
+
+if (allowedOrigins.length === 0) {
+    logger.warn(`CORS_ALLOWED_ORIGINS nu este setat.`, { module: 'BOOT' });
+}
+
+const allowedUploadMap = new Map<string, string[]>([
+    ['.pdf', ['application/pdf']],
+    ['.png', ['image/png']],
+    ['.jpg', ['image/jpeg']],
+    ['.jpeg', ['image/jpeg']],
+    ['.webp', ['image/webp']]
+]);
+
+const hasSignature = (buffer: Buffer, signature: number[]) =>
+    signature.every((value, index) => buffer[index] === value);
+
+const validateUploadedFileSignature = (filePath: string, mimeType: string): boolean => {
+    const fileBuffer = fs.readFileSync(filePath);
+    const bytes = fileBuffer.subarray(0, 16);
+
+    if (mimeType === 'application/pdf') {
+        return hasSignature(bytes, [0x25, 0x50, 0x44, 0x46]);
+    }
+    if (mimeType === 'image/png') {
+        return hasSignature(bytes, [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    }
+    if (mimeType === 'image/jpeg') {
+        return hasSignature(bytes, [0xFF, 0xD8, 0xFF]);
+    }
+    if (mimeType === 'image/webp') {
+        const riff = bytes.subarray(0, 4).toString('ascii') === 'RIFF';
+        const webp = bytes.subarray(8, 12).toString('ascii') === 'WEBP';
+        return riff && webp;
+    }
+    return false;
+};
+
+const safeDeleteFile = (filePath?: string) => {
+    if (!filePath) return;
+    try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (error) {
+        logger.warn(`Nu s-a putut șterge fișierul invalid`, {
+            module: 'UPLOAD',
+            details: { filePath, error: (error as Error).message }
+        });
+    }
+};
+
+// ============================================================================
 // MULTER CONFIGURATION
 // ============================================================================
 
@@ -168,12 +231,23 @@ const storage = multer.diskStorage({
         cb: (error: Error | null, filename: string) => void
     ) => {
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-        cb(null, uniqueSuffix + path.extname(file.originalname));
+        cb(null, uniqueSuffix + path.extname(file.originalname).toLowerCase());
     }
 });
 
+const fileFilter: multer.Options['fileFilter'] = (req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+    const allowedMimes = allowedUploadMap.get(extension);
+
+    if (!allowedMimes || !allowedMimes.includes(file.mimetype)) {
+        return cb(new Error('Tip fișier neacceptat. Sunt permise: PDF, PNG, JPG, JPEG, WEBP.'));
+    }
+    cb(null, true);
+};
+
 const upload = multer({ 
     storage, 
+    fileFilter,
     limits: { fileSize: 10 * 1024 * 1024 } 
 });
 
@@ -185,21 +259,56 @@ logger.success(`Multer upload configurat`, { module: 'BOOT', details: { maxSize:
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-// CORS cu whitelist + wildcard Vercel și accept fără origine (Postman/mobile)
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://primarie-site-ceva.vercel.app',
-    'https://primarie-site-ceva.vercel.app/'
-];
+const globalApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Prea multe cereri. Încearcă din nou în câteva minute.' }
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 8,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Prea multe încercări de autentificare. Încearcă din nou mai târziu.' }
+});
+
+const contactLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Ai trimis prea multe solicitări. Încearcă din nou mai târziu.' }
+});
+
+const announcementsWriteLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Prea multe operații de publicare. Încearcă din nou mai târziu.' }
+});
+
+app.use('/api', globalApiLimiter);
+app.use('/api/login', authLimiter);
+app.use('/api/contact-primar', contactLimiter);
 
 app.use(cors({ 
     origin: (origin, callback) => {
-        if (!origin) return callback(null, true); // permite unelte fără Origin
-        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        if (!origin) {
+            if (process.env.NODE_ENV !== 'production') return callback(null, true);
+            logger.warn(`CORS blocat - header Origin lipsă`, { module: 'SECURITY' });
+            return callback(new Error('Origin header required'));
+        }
+
+        const normalizedOrigin = normalizeOrigin(origin);
+        if (allowedOrigins.includes(normalizedOrigin)) {
             return callback(null, true);
         }
-        logger.warn(`CORS blocat pentru originea: ${origin}`, { module: 'SECURITY' });
+
+        logger.warn(`CORS blocat pentru originea: ${normalizedOrigin}`, { module: 'SECURITY' });
         return callback(new Error('Not allowed by CORS'));
     }, 
     credentials: true,
@@ -207,9 +316,9 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, wildcard: '*.vercel.app', credentials: true } });
+logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, credentials: true } });
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(uploadDir));
 
 // ============================================================================
@@ -242,39 +351,36 @@ app.use((req: any, res: Response, next: NextFunction) => {
 // MIDDLEWARE - AUTH
 // ============================================================================
 
-const identifyUser = (req: any, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (token) {
-        try {
-            req.user = jwt.verify(token, JWT_SECRET);
-            logger.debug(`User identificat`, { module: 'AUTH', requestId: req.id, details: { userId: req.user.userId, role: req.user.role } });
-        } catch {
-            req.user = null;
-        }
-    }
-    next();
-};
-
-const isAdminMiddleware = (req: any, res: Response, next: NextFunction) => {
+const authenticateToken = (req: any, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        logger.warn(`Admin access neautorizat - no token`, { module: 'AUTH', requestId: req.id });
+        logger.warn(`Access neautorizat - token lipsă`, { module: 'AUTH', requestId: req.id });
         return res.status(401).json({ error: 'Autentificare necesară.' });
     }
-    
+
     try {
         const decoded: any = jwt.verify(token, JWT_SECRET);
-        if (decoded.role?.toUpperCase() !== 'ADMIN') {
-            logger.warn(`Admin access neautorizat - insufficient role`, { module: 'AUTH', requestId: req.id, details: { role: decoded.role } });
-            return res.status(403).json({ error: 'Acces restricționat.' });
-        }
         req.user = decoded;
-        logger.info(`Admin acces permis`, { module: 'AUTH', requestId: req.id, details: { userId: decoded.userId } });
         next();
     } catch (err) {
-        logger.error(`Admin auth validation failed`, err, { module: 'AUTH', requestId: req.id });
-        res.status(401).json({ error: 'Sesiune expirată.' });
+        logger.warn(`Token invalid sau expirat`, { module: 'AUTH', requestId: req.id });
+        return res.status(401).json({ error: 'Sesiune expirată.' });
     }
+};
+
+const authorizeRoles = (...roles: string[]) => {
+    return (req: any, res: Response, next: NextFunction) => {
+        const role = String(req.user?.role || '').toUpperCase();
+        if (!role || !roles.includes(role)) {
+            logger.warn(`Access neautorizat - rol insuficient`, {
+                module: 'AUTH',
+                requestId: req.id,
+                details: { role, allowedRoles: roles }
+            });
+            return res.status(403).json({ error: 'Acces restricționat.' });
+        }
+        next();
+    };
 };
 
 // ============================================================================
@@ -312,7 +418,7 @@ app.get('/api/announcements', async (req: any, res: Response) => {
 // RUTA: POST /api/announcements - CREARE ANUNȚ
 // ============================================================================
 
-app.post('/api/announcements', upload.single('file'), async (req: any, res: Response): Promise<any> => {
+app.post('/api/announcements', authenticateToken, authorizeRoles('ADMIN', 'EDITOR'), announcementsWriteLimiter, upload.single('file'), async (req: any, res: Response): Promise<any> => {
     const { title, content, category } = req.body;
     const startTime = Date.now();
     
@@ -326,11 +432,27 @@ app.post('/api/announcements', upload.single('file'), async (req: any, res: Resp
                 requestId: req.id,
                 details: { hasTitle: !!title, hasContent: !!content }
             });
+            safeDeleteFile(req.file?.path);
             return res.status(400).json({ error: 'Titlu și conținut sunt obligatorii.' });
         }
 
+        if (!req.user?.userId) {
+            safeDeleteFile(req.file?.path);
+            return res.status(401).json({ error: 'Sesiune invalidă. Reautentificare necesară.' });
+        }
+
+        if (req.file && !validateUploadedFileSignature(req.file.path, req.file.mimetype)) {
+            logger.warn(`Upload blocat - semnătură fișier invalidă`, {
+                module: 'ANNOUNCEMENTS',
+                requestId: req.id,
+                details: { filename: req.file.originalname, mimetype: req.file.mimetype }
+            });
+            safeDeleteFile(req.file.path);
+            return res.status(400).json({ error: 'Fișier invalid sau corupt.' });
+        }
+
         const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;
-        const authorId = req.user?.userId || 5;
+        const authorId = Number(req.user.userId);
         
         logger.debug(`Date anunț validat`, { 
             module: 'ANNOUNCEMENTS', 
@@ -345,7 +467,7 @@ app.post('/api/announcements', upload.single('file'), async (req: any, res: Resp
                 category: String(category || "General"),
                 fileUrl: fileUrl,
                 isPublished: true,
-                authorId: Number(authorId)
+                authorId
             },
             include: { author: true }
         });
@@ -360,6 +482,7 @@ app.post('/api/announcements', upload.single('file'), async (req: any, res: Resp
         
         res.status(201).json(newAnnouncement);
     } catch (error) {
+        safeDeleteFile(req.file?.path);
         logger.error(`Eroare creare anunț`, error, { 
             module: 'ANNOUNCEMENTS', 
             requestId: req.id,

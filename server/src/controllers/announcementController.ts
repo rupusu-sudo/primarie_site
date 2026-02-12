@@ -2,13 +2,69 @@ import { Request, Response } from 'express';
 import { announcementSchema } from '../validators/announcementSchema';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
 
 const prisma = new PrismaClient();
 
-export const createAnnouncement = async (req: Request, res: Response) => {
+const hasSignature = (buffer: Buffer, signature: number[]) =>
+  signature.every((value, index) => buffer[index] === value);
+
+const validateUploadedFileSignature = (filePath: string, mimeType: string): boolean => {
+  const fileBuffer = fs.readFileSync(filePath);
+  const bytes = fileBuffer.subarray(0, 16);
+
+  if (mimeType === 'application/pdf') {
+    return hasSignature(bytes, [0x25, 0x50, 0x44, 0x46]);
+  }
+  if (mimeType === 'image/png') {
+    return hasSignature(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  }
+  if (mimeType === 'image/jpeg') {
+    return hasSignature(bytes, [0xff, 0xd8, 0xff]);
+  }
+  if (mimeType === 'image/webp') {
+    const riff = bytes.subarray(0, 4).toString('ascii') === 'RIFF';
+    const webp = bytes.subarray(8, 12).toString('ascii') === 'WEBP';
+    return riff && webp;
+  }
+  return false;
+};
+
+const safeDeleteFile = (filePath?: string) => {
+  if (!filePath) return;
   try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch {
+    // cleanup best-effort only
+  }
+};
+
+export const createAnnouncement = async (req: Request, res: Response) => {
+  const uploadedFile = (req as any).file as Express.Multer.File | undefined;
+
+  try {
+    const currentUserId = Number((req as any).user?.userId ?? (req as any).user?.id);
+    if (!Number.isInteger(currentUserId) || currentUserId <= 0) {
+      safeDeleteFile(uploadedFile?.path);
+      res.status(401).json({
+        success: false,
+        message: 'Autentificare invalida'
+      });
+      return;
+    }
+
+    if (uploadedFile && !validateUploadedFileSignature(uploadedFile.path, uploadedFile.mimetype)) {
+      safeDeleteFile(uploadedFile.path);
+      res.status(400).json({
+        success: false,
+        message: 'Fisier invalid'
+      });
+      return;
+    }
+
     // Validate request body
     const validatedData = announcementSchema.parse(req.body);
+    const fileUrl = uploadedFile ? `/uploads/${uploadedFile.filename}` : (validatedData.fileUrl || null);
 
     // Create announcement in database
     const announcement = await prisma.announcement.create({
@@ -16,8 +72,8 @@ export const createAnnouncement = async (req: Request, res: Response) => {
         title: validatedData.title,
         content: validatedData.content,
         category: validatedData.category,
-        fileUrl: validatedData.fileUrl || null,
-        authorId: (req as any).user?.id || 1, // Default to user 1 if not authenticated
+        fileUrl,
+        authorId: currentUserId,
       },
       include: {
         author: true
@@ -26,6 +82,7 @@ export const createAnnouncement = async (req: Request, res: Response) => {
 
     res.status(201).json(announcement);
   } catch (error) {
+    safeDeleteFile(uploadedFile?.path);
     if (error instanceof z.ZodError) {
       res.status(400).json({
         success: false,
