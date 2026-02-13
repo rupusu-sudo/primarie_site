@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { API_URL, withApiBase } from "@/config/api";
 
@@ -408,7 +409,11 @@ const VoceaAlmajului = () => {
 
           {/* Lightbox imagini */}
           <Dialog open={!!lightboxImage} onOpenChange={() => setLightboxImage(null)}>
-            <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto p-2 md:p-4 border-none bg-black/90 shadow-none overflow-visible [&>button]:bg-white/10 [&>button]:rounded-full [&>button]:text-white [&>button]:right-4 [&>button]:top-4">
+            <DialogContent
+              className="max-w-[95vw] max-h-[95vh] w-auto p-2 md:p-4 border-none bg-black/90 shadow-none overflow-visible [&>button]:bg-white/10 [&>button]:rounded-full [&>button]:text-white [&>button]:right-4 [&>button]:top-4"
+              aria-describedby={undefined}
+            >
+              <DialogTitle className="sr-only">Previzualizare imagine</DialogTitle>
               {lightboxImage && (
                 <img src={lightboxImage} alt="Vizualizare" className="max-w-full max-h-[85vh] w-auto mx-auto rounded-lg object-contain" />
               )}

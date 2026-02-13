@@ -266,7 +266,10 @@ const AdminDocumentManager = ({ categoryKey, title, icon: Icon = FileText, enabl
       </div>
 
       <Dialog open={!!viewDoc} onOpenChange={() => setViewDoc(null)}>
-        <DialogContent className="max-w-[1000px] w-[95vw] h-[92vh] p-0 bg-white flex flex-col rounded-xl overflow-hidden border-none shadow-2xl">
+        <DialogContent
+          className="max-w-[1000px] w-[95vw] h-[92vh] p-0 bg-white flex flex-col rounded-xl overflow-hidden border-none shadow-2xl"
+          aria-describedby={undefined}
+        >
           {viewDoc && (
             <>
               <div className="px-6 py-5 border-b border-slate-100 flex items-center bg-white shrink-0">

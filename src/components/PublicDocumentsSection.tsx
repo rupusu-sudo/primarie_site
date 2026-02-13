@@ -163,7 +163,7 @@ const PublicDocumentsSection = () => {
       </div>
 
       <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
-        <DialogContent className="max-w-5xl h-[85vh] p-0 flex flex-col">
+        <DialogContent className="max-w-5xl h-[85vh] p-0 flex flex-col" aria-describedby={undefined}>
           <DialogHeader className="px-6 py-4 border-b bg-white shrink-0">
             <DialogTitle className="truncate pr-8 text-base">{previewTitle}</DialogTitle>
           </DialogHeader>

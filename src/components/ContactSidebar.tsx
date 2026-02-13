@@ -150,7 +150,11 @@ const ContactSidebar = () => {
 
       {/* MODAL PROGRAMARE */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden [&>button]:hidden">
+        <DialogContent
+          className="max-w-md p-0 overflow-hidden [&>button]:hidden"
+          aria-describedby={undefined}
+        >
+          <DialogTitle className="sr-only">Programare audiență</DialogTitle>
           
           {/* MESAJ DE SUCCES - AICI AM MODIFICAT TEXTUL */}
           {submissionSuccess ? (

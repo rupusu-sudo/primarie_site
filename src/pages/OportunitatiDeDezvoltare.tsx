@@ -411,7 +411,10 @@ const OportunitatiDeDezvoltare = () => {
 
       {/* --- ADD JOB WIZARD MODAL --- */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl p-0 border-none rounded-2xl shadow-2xl bg-white overflow-hidden max-h-[90vh] flex flex-col">
+        <DialogContent
+          className="max-w-3xl p-0 border-none rounded-2xl shadow-2xl bg-white overflow-hidden max-h-[90vh] flex flex-col"
+          aria-describedby={undefined}
+        >
             <div className="bg-slate-50 border-b border-slate-200 px-8 py-6">
                 <div className="flex justify-between items-center mb-6">
                     <div>
@@ -604,7 +607,11 @@ const OportunitatiDeDezvoltare = () => {
 
       {/* VIEW DETAILS MODAL */}
       <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
-        <DialogContent className="max-w-xl p-0 border-none rounded-2xl shadow-2xl bg-white overflow-hidden">
+        <DialogContent
+          className="max-w-xl p-0 border-none rounded-2xl shadow-2xl bg-white overflow-hidden"
+          aria-describedby={undefined}
+        >
+             <DialogTitle className="sr-only">Detalii anunț de angajare</DialogTitle>
              <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex justify-between items-start">
                 <div>
                     <Badge className="bg-blue-600 text-white border-none mb-3 px-3 py-1 rounded-md text-xs font-bold tracking-wide">{selectedJob?.category}</Badge>

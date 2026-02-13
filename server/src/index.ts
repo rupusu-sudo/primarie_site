@@ -201,22 +201,75 @@ if (!fs.existsSync(uploadDir)) {
 
 logger.info(`Configurare email...`, { module: 'BOOT' });
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS 
-    }
-});
+const smtpUser = (process.env.SMTP_USER || '').trim();
+const smtpPass = (process.env.SMTP_PASS || '').trim();
+const smtpService = (process.env.SMTP_SERVICE || 'gmail').trim();
+const smtpHost = (process.env.SMTP_HOST || '').trim();
+const smtpPort = Number((process.env.SMTP_PORT || '').trim() || 465);
+const smtpSecureRaw = (process.env.SMTP_SECURE || '').trim().toLowerCase();
+const smtpSecure = smtpSecureRaw ? smtpSecureRaw === 'true' : smtpPort === 465;
 
-// Test email connection
-transporter.verify((error, success) => {
-    if (error) {
-        logger.warn(`Email service nu este disponibil`, { module: 'EMAIL', details: { error: error.message } });
-    } else {
-        logger.success(`Email service conectat`, { module: 'EMAIL' });
+const hasSmtpAuth = Boolean(smtpUser && smtpPass);
+const hasSmtpRoute = Boolean(smtpService || smtpHost);
+
+let transporter: nodemailer.Transporter | null = null;
+
+if (hasSmtpAuth && hasSmtpRoute) {
+    const transportConfig = smtpHost
+        ? {
+              host: smtpHost,
+              port: smtpPort,
+              secure: smtpSecure,
+              auth: { user: smtpUser, pass: smtpPass },
+              connectionTimeout: 15000,
+              greetingTimeout: 10000,
+              socketTimeout: 20000
+          }
+        : {
+              service: smtpService,
+              auth: { user: smtpUser, pass: smtpPass },
+              connectionTimeout: 15000,
+              greetingTimeout: 10000,
+              socketTimeout: 20000
+          };
+
+    transporter = nodemailer.createTransport(transportConfig);
+
+    // Test email connection
+    transporter.verify((error) => {
+        if (error) {
+            logger.warn(`Email service nu este disponibil`, { module: 'EMAIL', details: { error: error.message } });
+        } else {
+            logger.success(`Email service conectat`, { module: 'EMAIL' });
+        }
+    });
+} else {
+    logger.warn(`Email service dezactivat - configurare SMTP incompleta`, {
+        module: 'EMAIL',
+        details: {
+            hasSmtpUser: !!smtpUser,
+            hasSmtpPass: !!smtpPass,
+            hasSmtpService: !!smtpService,
+            hasSmtpHost: !!smtpHost
+        }
+    });
+}
+
+const sendMailWithTimeout = async (mailOptions: nodemailer.SendMailOptions, timeoutMs = 20000) => {
+    if (!transporter) throw new Error('SMTP_NOT_CONFIGURED');
+
+    let timeoutHandle: NodeJS.Timeout | null = null;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error(`SMTP_TIMEOUT_${timeoutMs}ms`)), timeoutMs);
+    });
+
+    try {
+        return await Promise.race([transporter.sendMail(mailOptions), timeoutPromise]);
+    } finally {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
     }
-});
+};
 
 // ============================================================================
 // SECURITY HELPERS
@@ -549,6 +602,14 @@ app.post('/api/contact-primar', async (req: Request, res: Response): Promise<any
     
     logger.info(`Preluare solicitare audiență...`, { module: 'CONTACT', requestId: reqId });
 
+    if (!transporter) {
+        logger.error(`Serviciul SMTP nu este configurat`, undefined, {
+            module: 'CONTACT',
+            requestId: reqId
+        });
+        return res.status(503).json({ error: 'Serviciul de email nu este configurat momentan.' });
+    }
+
     if (!name || !phone || !email) {
         logger.warn(`Validare eșuată - date lipsă`, { 
             module: 'CONTACT', 
@@ -701,13 +762,9 @@ app.post('/api/contact-primar', async (req: Request, res: Response): Promise<any
             `
         };
 
-        logger.debug(`Trimitere email către cetățean...`, { module: 'CONTACT', requestId: reqId });
-        await transporter.sendMail(mailToUser);
-        logger.success(`Email trimis cetățeanului`, { module: 'CONTACT', requestId: reqId, details: { to: email } });
-
-        logger.debug(`Trimitere email către primar...`, { module: 'CONTACT', requestId: reqId });
-        await transporter.sendMail(mailToPrimar);
-        logger.success(`Email trimis primarului`, { module: 'CONTACT', requestId: reqId });
+        logger.debug(`Trimitere email-uri...`, { module: 'CONTACT', requestId: reqId });
+        await Promise.all([sendMailWithTimeout(mailToUser, 20000), sendMailWithTimeout(mailToPrimar, 20000)]);
+        logger.success(`Email-uri trimise`, { module: 'CONTACT', requestId: reqId, details: { to: email } });
 
         const duration = Date.now() - startTime;
         logger.success(`Solicitare audiență procesată`, { 
@@ -724,7 +781,16 @@ app.post('/api/contact-primar', async (req: Request, res: Response): Promise<any
             requestId: reqId,
             details: { name, email }
         });
-        res.status(500).json({ error: 'Eroare server la trimiterea mail-ului.' });
+        const rawError = (error as Error)?.message || String(error);
+        const isTimeout = rawError.includes('SMTP_TIMEOUT');
+        const isConfig = rawError.includes('SMTP_NOT_CONFIGURED');
+        const status = isConfig ? 503 : 502;
+        const publicError = isConfig
+            ? 'Serviciul de email nu este configurat.'
+            : isTimeout
+                ? 'Serverul de email nu raspunde momentan. Incercati din nou.'
+                : 'Eroare server la trimiterea mail-ului.';
+        res.status(status).json({ error: publicError });
     }
 });
 

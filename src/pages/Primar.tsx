@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 import PageLayout from "@/components/PageLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,35 @@ const mayorData = {
   ] as FAQItem[],
 };
 
+const EMAILJS_SERVICE_ID =
+  (import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined)?.trim() || "service_kz54w39";
+const EMAILJS_TEMPLATE_ID =
+  (import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string | undefined)?.trim() || "template_8c1l8s9";
+const EMAILJS_PUBLIC_KEY =
+  (import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string | undefined)?.trim() || "dLtErg83Eo9yKtvTD";
+
+interface AudiencePayload {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+}
+
+const sendAudienceFallbackEmail = async (payload: AudiencePayload) => {
+  const templateParams = {
+    subject: `AUDIENTA: ${payload.name}`,
+    from_name: payload.name,
+    contact_email: payload.email,
+    phone: payload.phone,
+    description: payload.message || "Fara detalii suplimentare.",
+    category: "Primar / Audiente",
+    submission_date: new Date().toLocaleDateString("ro-RO"),
+    contract_type: "Transmitere online",
+  };
+
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
+};
+
 const Primar = () => {
   const pageRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -115,24 +145,63 @@ const Primar = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
-    const payload = {
-      name: data.get("user_name"),
-      phone: data.get("user_phone"),
-      email: data.get("user_email"),
-      message: data.get("message"),
+    const payload: AudiencePayload = {
+      name: String(data.get("user_name") || "").trim(),
+      phone: String(data.get("user_phone") || "").trim(),
+      email: String(data.get("user_email") || "").trim(),
+      message: String(data.get("message") || "").trim(),
     };
+
+    if (!payload.name || !payload.phone || !payload.email) {
+      toast({
+        title: "Date incomplete",
+        description: "Completeaza nume, telefon si email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_URL}/api/contact-primar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Network error");
-      toast({ title: "Solicitare trimisă", description: "Veți primi confirmare pe email." });
-      formRef.current?.reset();
-    } catch (err) {
-      toast({ title: "Eroare", description: "Nu am putut trimite solicitarea.", variant: "destructive" });
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
+      try {
+        const res = await fetch(`${API_URL}/api/contact-primar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`backend_${res.status}`);
+        }
+
+        toast({ title: "Solicitare trimisa", description: "Vei primi confirmare pe email." });
+        formRef.current?.reset();
+        return;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    } catch (backendError) {
+      console.warn("Eroare backend /api/contact-primar. Incerc fallback EmailJS.", backendError);
+
+      try {
+        await sendAudienceFallbackEmail(payload);
+        toast({
+          title: "Solicitare trimisa",
+          description: "Formularul a fost trimis prin canal alternativ.",
+        });
+        formRef.current?.reset();
+      } catch (fallbackError) {
+        console.error("Eroare fallback EmailJS:", fallbackError);
+        toast({
+          title: "Eroare",
+          description: "Nu am putut trimite solicitarea.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setSubmitting(false);
     }

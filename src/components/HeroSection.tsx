@@ -76,7 +76,6 @@ const HeroSection = () => {
               width={1920}
               height={1080}
               loading="eager"
-              fetchPriority="high"
               decoding="async"
               className="w-full h-full object-cover object-center"
             />
@@ -206,3 +205,4 @@ const ModernCard = ({
 };
 
 export default HeroSection;
+
