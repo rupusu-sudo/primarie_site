@@ -302,9 +302,8 @@ app.use(
     cors({
         origin: (origin, callback) => {
             if (!origin) {
-                if (!isProduction) return callback(null, true);
-                logger.warn('CORS blocked - missing Origin header', { module: 'SECURITY' });
-                return callback(new Error('CORS_ORIGIN_MISSING'));
+                // Requests from non-browser clients can legitimately omit Origin.
+                return callback(null, true);
             }
 
             // In development, allow browser origins when the allow-list is not configured.
