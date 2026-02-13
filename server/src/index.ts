@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { JWT_SECRET, IS_EPHEMERAL_JWT_SECRET } from './config/jwtSecret';
-import { allowedOrigins, corsMiddleware, corsPreflight } from './config/cors';
+import { allowNoOrigin, allowedOrigins, corsMiddleware, corsPreflight } from './config/cors';
 
 // ============================================================================
 // LOGGER PROFESIONAL
@@ -258,7 +258,11 @@ app.use(corsMiddleware);
 
 logger.info(`CORS configurat`, {
     module: 'BOOT',
-    details: { origins: allowedOrigins, credentials: true, noOriginAuth: 'X-Test-Api-Key' }
+    details: {
+        origins: allowedOrigins,
+        credentials: true,
+        noOriginMode: allowNoOrigin ? 'allowed' : 'requires X-Test-Api-Key'
+    }
 });
 
 app.use(express.json({ limit: '1mb' }));

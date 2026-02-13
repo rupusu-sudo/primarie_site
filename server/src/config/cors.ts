@@ -17,6 +17,8 @@ export const allowedOrigins = (
 
 const allowedOriginSet = new Set(allowedOrigins);
 const corsTestApiKey = (process.env.CORS_TEST_API_KEY || '').trim();
+const allowNoOriginByDefault =
+    (process.env.CORS_ALLOW_NO_ORIGIN || 'true').trim().toLowerCase() === 'true';
 
 const baseOptions: CorsOptions = {
     credentials: true,
@@ -45,6 +47,10 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
         return callback(null, { ...baseOptions, origin: false });
     }
 
+    if (allowNoOriginByDefault) {
+        return callback(null, { ...baseOptions, origin: false });
+    }
+
     if (corsTestApiKey && testApiKey === corsTestApiKey) {
         return callback(null, { ...baseOptions, origin: false });
     }
@@ -55,3 +61,4 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
 
 export const corsMiddleware = cors(corsOptionsDelegate);
 export const corsPreflight = cors(corsOptionsDelegate);
+export const allowNoOrigin = allowNoOriginByDefault;
