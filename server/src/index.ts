@@ -16,14 +16,22 @@ import { allowNoOrigin, allowedOrigins, corsMiddleware, corsPreflight } from './
 const ENV_FILE_CANDIDATES = [
   path.resolve(process.cwd(), '.env'),
   path.resolve(process.cwd(), 'server/.env'),
-  path.resolve(__dirname, '../.env')
+  path.resolve(__dirname, '../.env'),
+  path.resolve(__dirname, '../../.env')
 ];
 
+let envLoaded = false;
 for (const envFile of ENV_FILE_CANDIDATES) {
   if (fs.existsSync(envFile)) {
     dotenv.config({ path: envFile });
+    console.log(`[BOOT] Incarcat fisier config: ${envFile}`);
+    envLoaded = true;
     break;
   }
+}
+
+if (!envLoaded) {
+  console.log('[BOOT] Atentie: Nu a fost gasit niciun fisier .env. Se bazeaza pe variabilele de sistem.');
 }
 
 if (!process.env.DATABASE_URL) {

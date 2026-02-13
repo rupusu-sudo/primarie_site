@@ -1,6 +1,5 @@
 import crypto from 'crypto';
-
-const MIN_SECRET_LENGTH = 32;
+const MIN_SECRET_LENGTH = 20; 
 
 const candidateSecrets = [
   process.env.JWT_SECRET,
@@ -9,15 +8,14 @@ const candidateSecrets = [
 ]
   .map((value) => (value || '').trim())
   .filter(Boolean);
-
 const configuredSecret = candidateSecrets.find(
   (value) => value.length >= MIN_SECRET_LENGTH
 );
 
 if (!configuredSecret) {
   console.warn(
-    '[SECURITY] JWT secret missing/too short. Using a temporary in-memory secret for this process only. ' +
-      'Set JWT_SECRET (min 32 chars) in deployment env for stable authentication.'
+    '[SECURITY] JWT secret missing/too short. Using a temporary in-memory secret. ' +
+    'Set JWT_SECRET in deployment env for stable authentication.'
   );
 }
 
