@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Menu, Phone, ChevronDown, LogOut,
+  Menu, ChevronDown, LogOut,
   MessageCircle, User, Map, ChevronRight, X,
-  CreditCard, FileText, Megaphone
+  LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/AuthContext";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ import { useSwipe } from "@/hooks/use-swipe";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -123,13 +123,20 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl border-slate-100 p-2">
+                  {isAdmin && (
+                    <DropdownMenuItem asChild className="cursor-pointer p-2.5 rounded-xl font-medium focus:bg-blue-50">
+                      <Link to="/admin">
+                        <LayoutDashboard className="w-4 h-4 mr-2 text-blue-600" /> Panou Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer p-2.5 rounded-xl font-medium focus:bg-red-50">
                     <LogOut className="w-4 h-4 mr-2" /> Deconectare
                   </DropdownMenuItem>
                 </DropdownMenuContent>
                </DropdownMenu>
             ) : (
-              <Link to="/login-admin">
+              <Link to="/login">
                 <Button variant="ghost" size="icon" className="rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50">
                   <User className="w-5 h-5" />
                 </Button>
@@ -187,14 +194,25 @@ const Header = () => {
                     textColor="text-slate-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   />
-                  <MobileGridButton 
-                    to="/harta" 
-                    icon={<Map className="w-5 h-5 text-indigo-600" />} 
-                    label="GeoPortal Cadastral" 
-                    bgColor="bg-indigo-50"  
-                    textColor="text-slate-800"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
+                  {isAdmin ? (
+                    <MobileGridButton
+                      to="/admin"
+                      icon={<LayoutDashboard className="w-5 h-5 text-indigo-600" />}
+                      label="Panou Admin"
+                      bgColor="bg-indigo-50"
+                      textColor="text-slate-800"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                  ) : (
+                    <MobileGridButton
+                      to="/harta-digitala"
+                      icon={<Map className="w-5 h-5 text-indigo-600" />}
+                      label="GeoPortal Cadastral"
+                      bgColor="bg-indigo-50"
+                      textColor="text-slate-800"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -246,7 +264,7 @@ const Header = () => {
                 ))}
               </div>
 
-              {user && (
+              {user ? (
                 <div className="p-4 bg-white border-t border-slate-200">
                   <Button 
                     variant="destructive" 
@@ -254,6 +272,14 @@ const Header = () => {
                     className="w-full rounded-xl py-6 font-bold"
                   >
                     <LogOut className="w-5 h-5 mr-2" /> Deconectare
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-4 bg-white border-t border-slate-200">
+                  <Button asChild className="w-full rounded-xl py-6 font-bold bg-blue-600 hover:bg-blue-700">
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                      <User className="w-5 h-5 mr-2" /> Login Admin
+                    </Link>
                   </Button>
                 </div>
               )}

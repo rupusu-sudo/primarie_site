@@ -1,13 +1,10 @@
-﻿import React from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-
 const LoadingScreen = () => (
   <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
-    <DotLottieReact
-      src="https://lottie.host/4d866bf1-7a54-48c6-9c5c-ac770c7a3c12/CHSlCtBvwC.lottie"
-      loop
+    <dotlottie-wc
+      src="https://lottie.host/24521134-fd2b-4d48-8f69-37de7dd363ce/zUJjVSfKxJ.lottie"
+      style={{ width: 300, height: 300 }}
       autoplay
-      style={{ width: 220, height: 220 }}
+      loop
     />
   </div>
 );

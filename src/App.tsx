@@ -11,6 +11,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { AccessibilityProvider } from "./components/AccessibilityProvider";
 import Index from "./pages/Index";
+import LoadingScreen from "./components/LoadingScreen";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const Instiintari = lazy(() => import("./pages/Instiintari"));
 const VoceaAlmajului = lazy(() => import("./pages/VoceaAlmajului"));
 const OportunitatiDeDezvoltare = lazy(() => import("./pages/OportunitatiDeDezvoltare"));
 const LoginAdmin = lazy(() => import("./pages/LoginAdmin"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // --- CONDUCERE & EXECUTIV ---
@@ -58,20 +60,6 @@ const RegistruAgricol = lazy(() => import("./pages/servicii/RegistruAgricol"));
 const AsistentaSociala = lazy(() => import("./pages/servicii/AsistentaSociala"));
 const FondLocativ = lazy(() => import("./pages/servicii/FondLocativ"));
 
-const RouteSkeleton = () => (
-  <div className="min-h-screen bg-white">
-    <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <div className="mb-6 h-10 w-48 animate-pulse rounded-xl bg-slate-200" />
-      <div className="h-[42vh] animate-pulse rounded-3xl bg-slate-200" />
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="h-28 animate-pulse rounded-2xl bg-slate-200" />
-        <div className="h-28 animate-pulse rounded-2xl bg-slate-200" />
-        <div className="h-28 animate-pulse rounded-2xl bg-slate-200" />
-      </div>
-    </div>
-  </div>
-);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -84,12 +72,13 @@ const App = () => (
 
             <Header />
 
-            <Suspense fallback={<RouteSkeleton />}>
+            <Suspense fallback={<LoadingScreen />}>
               <main className="min-h-screen">
                 <Routes>
                 {/* Rute Principale */}
                 <Route path="/" element={<Index />} />
                 <Route path="/harta-digitala" element={<HartaDigitala />} />
+                <Route path="/harta" element={<HartaDigitala />} />
 
                 {/* Instituție */}
                 <Route path="/primaria" element={<Primaria />} />
@@ -100,6 +89,7 @@ const App = () => (
                 <Route path="/primaria/primar" element={<Primar />} />
                 <Route path="/primaria/viceprimar" element={<Viceprimar />} />
                 <Route path="/primaria/secretar-general" element={<Secretar />} />
+                <Route path="/primaria/secretar" element={<Secretar />} />
 
                 {/* Informații */}
                 <Route path="/contact" element={<Contact />} />
@@ -110,6 +100,8 @@ const App = () => (
                 <Route path="/vocea-almajului" element={<VoceaAlmajului />} />
                 <Route path="/oportunitati" element={<OportunitatiDeDezvoltare />} />
                 <Route path="/login" element={<LoginAdmin />} />
+                <Route path="/login-admin" element={<LoginAdmin />} />
+                <Route path="/admin" element={<AdminPanel />} />
 
                 {/* Monitor Oficial */}
                 <Route path="/monitorul-oficial" element={<MonitorulOficial />} />
