@@ -7,6 +7,12 @@
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "db:pull": "prisma db pull",
+    "db:push": "prisma db push",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:wipe": "ts-node scripts/wipeDatabase.ts --yes",
+    "db:bootstrap": "npm run prisma:generate && npm run db:migrate:deploy && npm run reset-admin",
     "test": "echo \"Error: no test specified\" && exit 1",
     "reset-admin": "ts-node scripts/resetAdminPassword.ts"
   },
