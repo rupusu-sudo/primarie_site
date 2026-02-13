@@ -30,6 +30,20 @@ if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL = process.env.MYSQL_PUBLIC_URL || process.env.MYSQL_URL || '';
 }
 
+if (!process.env.DATABASE_URL) {
+  const host = (process.env.MYSQLHOST || '').trim();
+  const port = (process.env.MYSQLPORT || '').trim();
+  const user = (process.env.MYSQLUSER || '').trim();
+  const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || '';
+  const database = (process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || '').trim();
+
+  if (host && port && user && password && database) {
+    process.env.DATABASE_URL =
+      `mysql://${encodeURIComponent(user)}:${encodeURIComponent(password)}` +
+      `@${host}:${port}/${database}`;
+  }
+}
+
 // ============================================================================
 // LOGGER PROFESIONAL
 // ============================================================================
@@ -128,7 +142,7 @@ const logger = {
 // ============================================================================
 
 if (!process.env.DATABASE_URL) {
-  console.error('[BOOT] Lipseste DATABASE_URL. Seteaza DATABASE_URL sau MYSQL_PUBLIC_URL/MYSQL_URL.');
+  console.error('[BOOT] Lipseste DATABASE_URL. Seteaza DATABASE_URL, MYSQL_PUBLIC_URL, MYSQL_URL sau setul MYSQLHOST/MYSQLPORT/MYSQLUSER/MYSQLPASSWORD/MYSQLDATABASE.');
   process.exit(1);
 }
 
