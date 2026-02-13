@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -12,6 +12,23 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { JWT_SECRET, IS_EPHEMERAL_JWT_SECRET } from './config/jwtSecret';
 import { allowNoOrigin, allowedOrigins, corsMiddleware, corsPreflight } from './config/cors';
+
+const ENV_FILE_CANDIDATES = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), 'server/.env'),
+  path.resolve(__dirname, '../.env')
+];
+
+for (const envFile of ENV_FILE_CANDIDATES) {
+  if (fs.existsSync(envFile)) {
+    dotenv.config({ path: envFile });
+    break;
+  }
+}
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.MYSQL_PUBLIC_URL || process.env.MYSQL_URL || '';
+}
 
 // ============================================================================
 // LOGGER PROFESIONAL
@@ -109,6 +126,11 @@ const logger = {
 // ============================================================================
 // CONFIGURARE SERVER
 // ============================================================================
+
+if (!process.env.DATABASE_URL) {
+  console.error('[BOOT] Lipseste DATABASE_URL. Seteaza DATABASE_URL sau MYSQL_PUBLIC_URL/MYSQL_URL.');
+  process.exit(1);
+}
 
 const app = express();
 const prisma = new PrismaClient();
