@@ -142,7 +142,21 @@ const logger = {
 // ============================================================================
 
 if (!process.env.DATABASE_URL) {
+  const envPresence = {
+    DATABASE_URL: !!process.env.DATABASE_URL,
+    MYSQL_PUBLIC_URL: !!process.env.MYSQL_PUBLIC_URL,
+    MYSQL_URL: !!process.env.MYSQL_URL,
+    MYSQLHOST: !!process.env.MYSQLHOST,
+    MYSQLPORT: !!process.env.MYSQLPORT,
+    MYSQLUSER: !!process.env.MYSQLUSER,
+    MYSQLPASSWORD: !!process.env.MYSQLPASSWORD,
+    MYSQL_ROOT_PASSWORD: !!process.env.MYSQL_ROOT_PASSWORD,
+    MYSQLDATABASE: !!process.env.MYSQLDATABASE,
+    MYSQL_DATABASE: !!process.env.MYSQL_DATABASE
+  };
+
   console.error('[BOOT] Lipseste DATABASE_URL. Seteaza DATABASE_URL, MYSQL_PUBLIC_URL, MYSQL_URL sau setul MYSQLHOST/MYSQLPORT/MYSQLUSER/MYSQLPASSWORD/MYSQLDATABASE.');
+  console.error(`[BOOT] Prezenta variabile DB: ${JSON.stringify(envPresence)}`);
   process.exit(1);
 }
 
