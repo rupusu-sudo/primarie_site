@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
@@ -12,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { JWT_SECRET, IS_EPHEMERAL_JWT_SECRET } from './config/jwtSecret';
+import { allowedOrigins, corsMiddleware, corsPreflight } from './config/cors';
 
 // ============================================================================
 // LOGGER PROFESIONAL
@@ -114,6 +114,9 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
+// Railway runs behind a proxy; this keeps rate-limit and request IP handling correct.
+app.set('trust proxy', 1);
+
 logger.info(`Inițializare server...`, { module: 'BOOT' });
 if (IS_EPHEMERAL_JWT_SECRET) {
     logger.warn(
@@ -160,17 +163,6 @@ transporter.verify((error, success) => {
 // ============================================================================
 // SECURITY HELPERS
 // ============================================================================
-
-const normalizeOrigin = (origin: string) => origin.replace(/\/+$/, '');
-const isProduction = process.env.NODE_ENV === 'production';
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
-    .split(',')
-    .map((origin) => normalizeOrigin(origin.trim()))
-    .filter(Boolean);
-
-if (allowedOrigins.length === 0) {
-    logger.warn(`CORS_ALLOWED_ORIGINS nu este setat.`, { module: 'BOOT' });
-}
 
 const allowedUploadMap = new Map<string, string[]>([
     ['.pdf', ['application/pdf']],
@@ -261,12 +253,23 @@ logger.success(`Multer upload configurat`, { module: 'BOOT', details: { maxSize:
 // ============================================================================
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.options(/.*/, corsPreflight);
+app.use(corsMiddleware);
+
+logger.info(`CORS configurat`, {
+    module: 'BOOT',
+    details: { origins: allowedOrigins, credentials: true, noOriginAuth: 'X-Test-Api-Key' }
+});
+
+app.use(express.json({ limit: '1mb' }));
+app.use('/uploads', express.static(uploadDir));
 
 const globalApiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { error: 'Prea multe cereri. Încearcă din nou în câteva minute.' }
 });
 
@@ -275,6 +278,7 @@ const authLimiter = rateLimit({
     max: 8,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { error: 'Prea multe încercări de autentificare. Încearcă din nou mai târziu.' }
 });
 
@@ -283,6 +287,7 @@ const contactLimiter = rateLimit({
     max: 10,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { error: 'Ai trimis prea multe solicitări. Încearcă din nou mai târziu.' }
 });
 
@@ -291,6 +296,7 @@ const announcementsWriteLimiter = rateLimit({
     max: 20,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { error: 'Prea multe operații de publicare. Încearcă din nou mai târziu.' }
 });
 
@@ -298,37 +304,6 @@ app.use('/api', globalApiLimiter);
 app.use('/api/login', authLimiter);
 app.use('/api/contact-primar', contactLimiter);
 
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            if (!origin) {
-                // Requests from non-browser clients can legitimately omit Origin.
-                return callback(null, true);
-            }
-
-            // In development, allow browser origins when the allow-list is not configured.
-            if (!isProduction && allowedOrigins.length === 0) {
-                return callback(null, true);
-            }
-
-            const normalizedOrigin = normalizeOrigin(origin);
-            if (allowedOrigins.includes(normalizedOrigin)) {
-                return callback(null, true);
-            }
-
-            logger.warn(`CORS blocked for origin: ${normalizedOrigin}`, { module: 'SECURITY' });
-            return callback(new Error('CORS_ORIGIN_NOT_ALLOWED'));
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization']
-    })
-);
-
-logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, credentials: true } });
-
-app.use(express.json({ limit: '1mb' }));
-app.use('/uploads', express.static(uploadDir));
 
 // ============================================================================
 // MIDDLEWARE - REQUEST TRACKING & LOGGING
@@ -752,10 +727,12 @@ app.get('/health', (req: any, res: Response) => {
 
 app.use((err: any, req: any, res: Response, next: NextFunction) => {
     if (err?.message === 'CORS_ORIGIN_MISSING') {
-        return res.status(403).json({ error: 'Origin header required.' });
+        return res
+            .status(403)
+            .json({ error: 'CORS: missing Origin. Use X-Test-Api-Key for Postman/curl.' });
     }
     if (err?.message === 'CORS_ORIGIN_NOT_ALLOWED') {
-        return res.status(403).json({ error: 'Origin not allowed by CORS.' });
+        return res.status(403).json({ error: 'CORS: origin not allowed.' });
     }
     logger.error(`Unhandled error`, err, { module: 'ERROR', requestId: req.id });
     res.status(500).json({ error: 'Internal server error' });
