@@ -1,4 +1,10 @@
-export const API_URL = 'https://primariesite-production.up.railway.app';
+const normalizeBaseUrl = (url: string) => url.replace(/\/+$/, "");
+const configuredApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+const fallbackApiUrl = import.meta.env.DEV
+  ? "http://localhost:3001"
+  : "https://primariesite-production.up.railway.app";
+
+export const API_URL = normalizeBaseUrl(configuredApiUrl || fallbackApiUrl);
 
 export const withApiBase = (url?: string | null): string | undefined => {
   if (!url) return undefined;

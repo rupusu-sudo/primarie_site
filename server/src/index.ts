@@ -162,6 +162,7 @@ transporter.verify((error, success) => {
 // ============================================================================
 
 const normalizeOrigin = (origin: string) => origin.replace(/\/+$/, '');
+const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
     .split(',')
     .map((origin) => normalizeOrigin(origin.trim()))
@@ -297,26 +298,33 @@ app.use('/api', globalApiLimiter);
 app.use('/api/login', authLimiter);
 app.use('/api/contact-primar', contactLimiter);
 
-app.use(cors({ 
-    origin: (origin, callback) => {
-        if (!origin) {
-            if (process.env.NODE_ENV !== 'production') return callback(null, true);
-            logger.warn(`CORS blocat - header Origin lipsă`, { module: 'SECURITY' });
-            return callback(new Error('Origin header required'));
-        }
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) {
+                if (!isProduction) return callback(null, true);
+                logger.warn('CORS blocked - missing Origin header', { module: 'SECURITY' });
+                return callback(new Error('CORS_ORIGIN_MISSING'));
+            }
 
-        const normalizedOrigin = normalizeOrigin(origin);
-        if (allowedOrigins.includes(normalizedOrigin)) {
-            return callback(null, true);
-        }
+            // In development, allow browser origins when the allow-list is not configured.
+            if (!isProduction && allowedOrigins.length === 0) {
+                return callback(null, true);
+            }
 
-        logger.warn(`CORS blocat pentru originea: ${normalizedOrigin}`, { module: 'SECURITY' });
-        return callback(new Error('Not allowed by CORS'));
-    }, 
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+            const normalizedOrigin = normalizeOrigin(origin);
+            if (allowedOrigins.includes(normalizedOrigin)) {
+                return callback(null, true);
+            }
+
+            logger.warn(`CORS blocked for origin: ${normalizedOrigin}`, { module: 'SECURITY' });
+            return callback(new Error('CORS_ORIGIN_NOT_ALLOWED'));
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    })
+);
 
 logger.info(`CORS configurat`, { module: 'BOOT', details: { origins: allowedOrigins, credentials: true } });
 
@@ -744,6 +752,12 @@ app.get('/health', (req: any, res: Response) => {
 // ============================================================================
 
 app.use((err: any, req: any, res: Response, next: NextFunction) => {
+    if (err?.message === 'CORS_ORIGIN_MISSING') {
+        return res.status(403).json({ error: 'Origin header required.' });
+    }
+    if (err?.message === 'CORS_ORIGIN_NOT_ALLOWED') {
+        return res.status(403).json({ error: 'Origin not allowed by CORS.' });
+    }
     logger.error(`Unhandled error`, err, { module: 'ERROR', requestId: req.id });
     res.status(500).json({ error: 'Internal server error' });
 });
