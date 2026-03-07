@@ -19,7 +19,7 @@ const config: ServicePageConfig = {
     "Registrul agricol susține evidența locală a terenurilor, culturilor și animalelor și este baza pentru adeverințe și alte documente administrative. Actualizarea corectă a datelor este importantă pentru solicitările către APIA, pentru atestatele de producător și pentru orice procedură care cere confirmarea situației agricole declarate.",
   locality: "Primăria Almăj, compartimentul Registru Agricol",
   phone: "0251 447 113",
-  email: "primariaalmaj@yahoo.com",
+  email: "primariaalmaj@gmail.com",
   heroActions: [
     { label: "Vezi documentele", href: "#documente" },
     { label: "Contact compartiment", href: "#intrebari" },

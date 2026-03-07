@@ -9,6 +9,8 @@ const config: ServicePageConfig = {
   servicePage: "asistenta-sociala",
   title: "Asistență Socială",
   titleIcon: HandHeart,
+  titleClassName: "lg:whitespace-nowrap lg:text-[3.7rem] xl:text-[4.1rem]",
+  heroGridClassName: "lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)] xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]",
   badgeLabel: "Servicii de sprijin social",
   subtitle: "Beneficii, eligibilitate, documente și sprijin pentru persoane vulnerabile.",
   description:

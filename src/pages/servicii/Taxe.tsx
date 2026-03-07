@@ -1,5 +1,4 @@
-import { Banknote, CalendarDays, Landmark, MapPin, Phone } from "lucide-react";
-
+import { Calculator, CalendarDays, Landmark, MapPin, Phone } from "lucide-react";
 import {
   ServicePageLayout,
   type ServicePageConfig,
@@ -8,7 +7,8 @@ import {
 const config: ServicePageConfig = {
   servicePage: "impozite-si-taxe",
   title: "Impozite și Taxe",
-  titleIcon: Banknote,
+  titleIcon: Calculator,
+  mobileTitleLines: ["Impozite", "și", "Taxe"],
   badgeLabel: "Servicii fiscale locale",
   subtitle: "Plată, declarații fiscale și documente utile pentru contribuabili.",
   description:

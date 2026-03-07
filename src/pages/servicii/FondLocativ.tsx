@@ -19,7 +19,7 @@ const config: ServicePageConfig = {
     "Solicitările din fondul locativ se bazează pe criterii clare, dosare complete și verificarea situației locative și a veniturilor declarate. Structura paginii urmează același model ca pagina Primar: introducere, repere rapide, pași esențiali, întrebări frecvente și documentele publicate pentru această zonă administrativă.",
   locality: "Primăria Almăj, compartimentul fond locativ",
   phone: "0251 447 113",
-  email: "primariaalmaj@yahoo.com",
+  email: "primariaalmaj@gmail.com",
   heroActions: [
     { label: "Vezi documentele", href: "#documente" },
     { label: "Listări și proceduri", href: "#cerinte" },

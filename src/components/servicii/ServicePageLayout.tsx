@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import PageLayout from "@/components/PageLayout";
+import { ServiceInfoGrid, type ServiceInfoItem } from "@/components/servicii/ServiceInfoGrid";
 import { API_URL, withApiBase } from "@/config/api";
 import { useServiceDocuments } from "@/hooks/useServiceDocuments";
+import { cn } from "@/lib/utils";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -22,9 +24,9 @@ import {
 gsap.registerPlugin(ScrollTrigger);
 
 export type ServiceFact = {
-  label: string;
-  value: string;
-  icon: LucideIcon;
+  label: ServiceInfoItem["label"];
+  value: ServiceInfoItem["value"];
+  icon: ServiceInfoItem["icon"];
 };
 
 export type ServiceHeroAction = {
@@ -44,6 +46,9 @@ export type ServicePageConfig = {
   servicePage: string;
   title: string;
   titleIcon: LucideIcon;
+  mobileTitleLines?: string[];
+  titleClassName?: string;
+  heroGridClassName?: string;
   badgeLabel: string;
   subtitle: string;
   description: string;
@@ -186,7 +191,12 @@ export const ServicePageLayout = ({ config }: ServicePageLayoutProps) => {
         ref={pageRef}
         className="max-w-[92rem] mx-auto px-3 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-10 flex flex-col gap-8 lg:gap-10 overflow-x-hidden"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-stretch gap-6 lg:gap-8 xl:gap-10">
+        <div
+          className={cn(
+            "grid grid-cols-1 lg:grid-cols-2 lg:items-stretch gap-6 lg:gap-8 xl:gap-10",
+            config.heroGridClassName,
+          )}
+        >
           <div className="order-1 flex w-full flex-col items-center space-y-5 text-center lg:items-start lg:text-left lg:pr-5 xl:pr-7">
             <div className="service-fade-in-left inline-flex">
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-blue-700 bg-blue-50/60 px-3 py-1 rounded-md">
@@ -194,35 +204,62 @@ export const ServicePageLayout = ({ config }: ServicePageLayoutProps) => {
               </span>
             </div>
 
-            <div className="service-fade-in-left flex items-center justify-center gap-4 lg:justify-start">
+            <div className="service-fade-in-left flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <span className="inline-flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-blue-700 shadow-sm">
                 <TitleIcon className="h-7 w-7 sm:h-8 sm:w-8" />
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.05] tracking-tight">
+              <h1
+                className={cn(
+                  "text-center text-4xl sm:hidden font-black text-slate-900 leading-[1.05] tracking-tight",
+                  config.titleClassName,
+                )}
+              >
+                {config.mobileTitleLines?.length ? (
+                  config.mobileTitleLines.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))
+                ) : (
+                  config.title
+                )}
+              </h1>
+              <h1
+                className={cn(
+                  "hidden text-center sm:block sm:text-5xl lg:text-left lg:text-6xl font-black text-slate-900 leading-[1.05] tracking-tight",
+                  config.titleClassName,
+                )}
+              >
                 {config.title}
               </h1>
             </div>
 
-            <div className="service-fade-in-left">
-              <span className="text-base sm:text-lg font-semibold text-slate-700">
+            <div className="service-fade-in-left max-w-[34rem]">
+              <span className="block text-center text-base sm:text-lg font-semibold text-slate-700 lg:text-left">
                 {config.subtitle}
               </span>
             </div>
 
-            <div className="service-fade-in-left flex w-full flex-col gap-3 pt-2 text-sm font-medium text-slate-700 sm:text-base">
-              <span className="flex items-center justify-center gap-3 lg:justify-start">
-                <MapPin className="w-5 h-5 text-blue-500" />
-                {config.locality}
+            <div className="service-fade-in-left flex w-full max-w-[30rem] flex-col gap-3 pt-2 text-sm font-medium text-slate-700 sm:text-base">
+              <span className="flex w-full items-center justify-center gap-3 lg:justify-start">
+                <MapPin className="h-5 w-5 shrink-0 text-blue-500" />
+                <span className="text-center leading-snug lg:text-left">{config.locality}</span>
               </span>
-              <span className="flex items-center justify-center gap-3 lg:justify-start">
-                <Phone className="w-5 h-5 text-blue-500" />
-                <a href={`tel:${config.phone.replace(/\s/g, "")}`} className="hover:text-blue-600 transition-colors">
+              <span className="flex w-full items-center justify-center gap-3 lg:justify-start">
+                <Phone className="h-5 w-5 shrink-0 text-blue-500" />
+                <a
+                  href={`tel:${config.phone.replace(/\s/g, "")}`}
+                  className="text-center hover:text-blue-600 transition-colors lg:text-left"
+                >
                   {config.phone}
                 </a>
               </span>
-              <span className="flex items-center justify-center gap-3 lg:justify-start">
-                <Mail className="w-5 h-5 text-blue-500" />
-                <a href={`mailto:${config.email}`} className="hover:text-blue-600 transition-colors break-all">
+              <span className="flex w-full items-center justify-center gap-3 lg:justify-start">
+                <Mail className="h-5 w-5 shrink-0 text-blue-500" />
+                <a
+                  href={`mailto:${config.email}`}
+                  className="text-center hover:text-blue-600 transition-colors break-all lg:text-left"
+                >
                   {config.email}
                 </a>
               </span>
@@ -233,6 +270,7 @@ export const ServicePageLayout = ({ config }: ServicePageLayoutProps) => {
                 <Button
                   key={action.label}
                   size="lg"
+                  variant={index === 0 ? "default" : "outline"}
                   className={
                     index === 0
                       ? "h-12 sm:h-14 px-6 rounded-xl text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5"
@@ -280,6 +318,7 @@ export const ServicePageLayout = ({ config }: ServicePageLayoutProps) => {
                 <Button
                   key={action.label}
                   size="lg"
+                  variant={index === 0 ? "default" : "outline"}
                   className={
                     index === 0
                       ? "h-12 sm:h-14 px-8 rounded-xl text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5"
@@ -304,23 +343,7 @@ export const ServicePageLayout = ({ config }: ServicePageLayoutProps) => {
           <h2 id="service-facts-title" className="sr-only">
             Informații rapide
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {config.facts.map((fact) => (
-              <div key={fact.label} className="service-stagger-item flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">
-                    {fact.label}
-                  </p>
-                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">
-                    {fact.value}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ServiceInfoGrid items={config.facts} />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-8 lg:gap-10 border-t border-slate-200 pt-8 lg:pt-10 mt-0 sm:mt-1">
