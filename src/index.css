@@ -1,0 +1,505 @@
+/* Fonturi self-hosted pentru reducerea render-blocking + CLS */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  size-adjust: 107%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-ext.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  size-adjust: 107%;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 217 91% 60%;
+    --primary-dark: 217 91% 40%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 217 91% 95%;
+    --accent-foreground: 217 91% 40%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom colors */
+    --hero-gradient-start: 217 91% 50%;
+    --hero-gradient-end: 217 91% 40%;
+    --text-light: 0 0% 100%;
+    --text-light-muted: 217 91% 90%;
+    
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 212 27% 84%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(var(--hero-gradient-start)) 0%, hsl(var(--hero-gradient-end)) 100%);
+  }
+
+  .hero-wave {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23ffffff' d='M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    background-position: bottom;
+    background-repeat: no-repeat;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .badge-new {
+    @apply bg-success text-success-foreground;
+  }
+
+  .badge-important {
+    @apply bg-warning text-warning-foreground;
+  }
+
+  .badge-licitatie {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+
+  .section-label {
+    @apply text-primary font-semibold text-sm uppercase tracking-wider flex items-center gap-2;
+  }
+
+  .stat-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .stat-dot-green {
+    @apply bg-success;
+  }
+
+  .stat-dot-blue {
+    @apply bg-primary;
+  }
+
+  .stat-dot-yellow {
+    @apply bg-warning;
+  }
+
+}
+
+@layer components {
+  .history-mobile-main {
+    @apply mx-auto w-full space-y-6 px-4 pb-24 sm:px-5 lg:space-y-8;
+    max-width: 100%;
+  }
+
+  .history-card {
+    @apply w-full rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5 lg:p-6;
+  }
+
+  .history-card-stack {
+    @apply space-y-6 lg:space-y-8;
+  }
+
+  .history-page-header {
+    @apply py-10 md:py-12;
+  }
+
+  .history-hero-title {
+    font-size: clamp(1.625rem, 7vw, 2rem);
+    line-height: 1.15;
+  }
+
+  .history-section-title {
+    font-size: clamp(1.125rem, 5.2vw, 1.4rem);
+    line-height: 1.28;
+    font-weight: 800;
+  }
+
+  .history-chapter-title {
+    font-size: clamp(1.125rem, 4.8vw, 1.35rem);
+    line-height: 1.3;
+    font-weight: 800;
+  }
+
+  .history-body-text {
+    font-size: clamp(1rem, 4.1vw, 1.125rem);
+    line-height: 1.7;
+    text-wrap: pretty;
+  }
+
+  .history-subtitle {
+    @apply mt-3 max-w-3xl text-base leading-8 md:text-lg;
+  }
+
+  .history-title-divider {
+    @apply mt-5 mb-5 h-px w-full max-w-3xl bg-slate-300/90;
+  }
+
+  .history-chapter-grid {
+    @apply grid gap-4 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:items-start lg:gap-6;
+  }
+
+  .history-chapter-media {
+    @apply relative w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-200;
+    height: clamp(220px, 64vw, 260px);
+  }
+
+  .history-slide-layer {
+    @apply absolute inset-0 opacity-0 transition-opacity ease-in-out;
+    transition-duration: 1200ms;
+  }
+
+  .history-slide-layer.is-active {
+    @apply opacity-100;
+  }
+
+  .history-slide-bg {
+    @apply absolute inset-0 bg-cover bg-center;
+    filter: blur(20px) saturate(90%) brightness(0.78);
+    transform: scale(1.14);
+  }
+
+  .history-slide-fg {
+    @apply relative z-10 h-full w-full object-fill object-center;
+  }
+
+  .history-chapter-copy {
+    @apply space-y-3 md:space-y-4;
+  }
+
+  .history-chapter-label {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-blue-700;
+  }
+
+  .history-chronology-box {
+    @apply rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-7 text-amber-900;
+  }
+
+  .history-quote-box {
+    @apply rounded-lg border border-blue-200 bg-blue-50/60 p-3 text-sm leading-7 text-slate-700;
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .history-mobile-main {
+    max-width: 900px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .history-mobile-main {
+    max-width: 1200px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .history-chapter-media {
+    height: clamp(420px, 40vw, 520px);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+html.contact-scrollbar-hidden,
+body.contact-scrollbar-hidden,
+#root.contact-scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.contact-scrollbar-hidden::-webkit-scrollbar,
+body.contact-scrollbar-hidden::-webkit-scrollbar,
+#root.contact-scrollbar-hidden::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Accessibility toggles */
+html[data-font="115"] {
+  font-size: 115%;
+}
+html[data-font="130"] {
+  font-size: 130%;
+}
+
+html[data-contrast="on"] {
+  color-scheme: light;
+}
+
+html[data-contrast="on"] body,
+html[data-contrast="on"] #root {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+html[data-contrast="on"] [class*="bg-"],
+html[data-contrast="on"] [class*="from-"],
+html[data-contrast="on"] [class*="via-"],
+html[data-contrast="on"] [class*="to-"],
+html[data-contrast="on"] .hero-gradient,
+html[data-contrast="on"] .hero-wave {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+html[data-contrast="on"] [class*="text-"],
+html[data-contrast="on"] p,
+html[data-contrast="on"] span,
+html[data-contrast="on"] h1,
+html[data-contrast="on"] h2,
+html[data-contrast="on"] h3,
+html[data-contrast="on"] h4,
+html[data-contrast="on"] h5,
+html[data-contrast="on"] h6,
+html[data-contrast="on"] li,
+html[data-contrast="on"] label,
+html[data-contrast="on"] a,
+html[data-contrast="on"] button {
+  color: #000000 !important;
+}
+
+html[data-contrast="on"] [class*="border-"],
+html[data-contrast="on"] [class*="ring-"],
+html[data-contrast="on"] button,
+html[data-contrast="on"] input,
+html[data-contrast="on"] textarea,
+html[data-contrast="on"] select {
+  border-color: #000000 !important;
+  --tw-ring-color: #000000 !important;
+}
+
+html[data-contrast="on"] a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+html[data-contrast="on"] :focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px;
+}
+
+html[data-contrast="on"] *::before,
+html[data-contrast="on"] *::after {
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html[data-contrast="on"] img,
+html[data-contrast="on"] video,
+html[data-contrast="on"] svg {
+  filter: grayscale(100%) contrast(1.15);
+}
+
+html[data-motion="reduce"] * {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 120ms !important;
+}
+
+/* About coverflow carousel */
+.about-coverflow {
+  position: relative;
+  width: min(640px, 96vw);
+  margin: 0 auto;
+}
+
+.coverflow-viewport {
+  position: relative;
+  height: clamp(260px, 38vw, 360px);
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.coverflow-card-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform:
+    translateX(calc(var(--offset) * 16%))
+    translateZ(calc(var(--abs-offset) * -140px))
+    rotateY(calc(var(--offset) * 18deg));
+  filter: blur(calc(var(--abs-offset) * 1.4px));
+  z-index: calc(100 - var(--abs-offset) * 10);
+  opacity: calc(1 - (var(--abs-offset) * 0.18));
+  transition: transform 0.45s ease, filter 0.35s ease, z-index 0.35s ease, opacity 0.35s ease;
+}
+
+.coverflow-card {
+  width: clamp(200px, 26vw, 260px);
+  height: 100%;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8f0ff, #ffffff);
+  box-shadow: 0 18px 60px -28px rgba(15, 23, 42, 0.35);
+  transform: translateY(calc(var(--abs-offset) * 6px));
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.coverflow-card.active {
+  transform: translateY(0) scale(1.06);
+  box-shadow: 0 22px 80px -30px rgba(15, 23, 42, 0.4);
+}
+
+.coverflow-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverflow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.coverflow-nav:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 14px 40px -20px rgba(15, 23, 42, 0.55);
+  color: #1d4ed8;
+}
+
+.coverflow-nav.left {
+  left: -56px;
+}
+
+.coverflow-nav.right {
+  right: -56px;
+}
+
+@media (max-width: 768px) {
+  .coverflow-nav.left {
+    left: -8px;
+  }
+  .coverflow-nav.right {
+    right: -8px;
+  }
+}
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900; /* Fundal general mai soft decât albul pur */
+  }
+}

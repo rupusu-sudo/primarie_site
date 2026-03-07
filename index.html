@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/flavicon.png" />
+    <link rel="preconnect" href="https://primariesite-production.up.railway.app" crossorigin />
+    <link rel="dns-prefetch" href="//primariesite-production.up.railway.app" />
+    <link
+      rel="preload"
+      as="image"
+      href="/hero/hero-1280.avif"
+      imagesrcset="/hero/hero-768.avif 768w, /hero/hero-1280.avif 1280w, /hero/hero-1920.avif 1920w"
+      imagesizes="100vw"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <title>Primăria Comunei Almăj - Portal Cetățeni</title>
+    <meta name="description" content="Portal oficial al Primăriei Comunei Almăj, Județul Dolj. Acces la servicii, informații și documente publice pentru cetățeni." />
+
+    <script>
+      if (typeof global === "undefined") {
+        window.global = window;
+      }
+    </script>
+
+    <meta property="og:title" content="Primăria Comunei Almăj - Portal Cetățeni" />
+    <meta property="og:description" content="Portal oficial al Primăriei Comunei Almăj, Județul Dolj." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/flavicon.png" />
+    <script
+      src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js"
+      type="module"
+    ></script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

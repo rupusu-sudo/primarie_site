@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  role          String         @default("USER")
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  announcements Announcement[]
+  auditLogs     AuditLog[]
+
+  @@map("User")
+}
+
+model Document {
+  id              Int            @id @default(autoincrement())
+  title           String         @db.VarChar(255)
+  category        String         @db.VarChar(100)
+  authorName      String?        @db.VarChar(255)
+  content         String?        @db.Text
+  fileUrl         String?        @db.VarChar(500)
+  likes           Int            @default(0)
+  officialSupport Boolean        @default(false)
+  ownerId         String?        @db.VarChar(100)
+  parentId        Int?
+  parent          Document?      @relation("ThreadRelation", fields: [parentId], references: [id], onDelete: Cascade)
+  replies         Document[]     @relation("ThreadRelation")
+  documentLikes   DocumentLike[]
+  year            Int?
+  createdAt       DateTime       @default(now())
+
+  @@map("Document")
+}
+
+model DocumentLike {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  deviceId   String   @db.VarChar(100)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, deviceId])
+  @@map("DocumentLike")
+}
+
+model Announcement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  category    String   @default("General")
+  fileUrl     String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+
+  @@index([createdAt])
+  @@map("Announcement")
+}
+
+model CouncilActivityDocument {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  slug        String?  @unique @db.VarChar(255)
+  type        String   @db.VarChar(64)
+  year        Int
+  date        DateTime
+  description String?  @db.Text
+  fileUrl     String?  @db.VarChar(500)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, year])
+  @@index([isPublished, year])
+  @@map("CouncilActivityDocument")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  entity    String
+  entityId  Int?
+  details   String?
+  ipAddress String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+
+  @@map("AuditLog")
+}
