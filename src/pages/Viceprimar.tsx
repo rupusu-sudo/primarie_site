@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PageLayout from "@/components/PageLayout";
+import { ServiceInfoGrid } from "@/components/servicii/ServiceInfoGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -219,24 +220,14 @@ const Viceprimar = () => {
         {/* 2. INFORMAȚII RAPIDE */}
         <section className="stagger-container" aria-labelledby="facts-title">
           <h2 id="facts-title" className="sr-only">Informații rapide</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[
+          <ServiceInfoGrid
+            items={[
               { label: "Program audiențe", value: viceprimarData.audienceSchedule, icon: Calendar },
               { label: "Locație", value: viceprimarData.location, icon: MapPin },
               { label: "Contact", value: viceprimarData.phone, icon: Phone },
-              { label: "Timp răspuns", value: viceprimarData.responseTime, icon: FileText }
-            ].map((fact, idx) => (
-              <div key={idx} className="stagger-item gsap-optimize flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">{fact.label}</p>
-                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">{fact.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              { label: "Timp răspuns", value: viceprimarData.responseTime, icon: FileText },
+            ]}
+          />
         </section>
 
         {/* 3. SOLICITĂRI + INFORMAȚII (Layout 2x2 Simetric) */}

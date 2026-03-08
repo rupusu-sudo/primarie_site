@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState, useMemo } from "react";
 import PageLayout from "@/components/PageLayout";
+import { ServiceInfoGrid } from "@/components/servicii/ServiceInfoGrid";
 import CouncilActivitySection from "@/components/CouncilActivitySection";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -292,24 +293,14 @@ const ConsiliulLocal = () => {
         {/* --- FACT GRID --- */}
         <section className="stagger-container" aria-labelledby="facts-title">
           <h2 id="facts-title" className="sr-only">Informații rapide</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[
+          <ServiceInfoGrid
+            items={[
               { label: "Componență", value: consiliuData.membersCount, icon: Users },
               { label: "Mandat", value: consiliuData.mandate.split(" ")[1] + " - 2028", icon: Calendar },
               { label: "Ședințe", value: consiliuData.meetings, icon: Gavel },
-              { label: "Locație", value: "Sala de Ședințe", icon: MapPin }
-            ].map((fact, idx) => (
-              <div key={idx} className="stagger-item gsap-optimize flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">{fact.label}</p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 leading-snug">{fact.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              { label: "Locație", value: "Sala de Ședințe", icon: MapPin },
+            ]}
+          />
         </section>
 
         {/* --- ATRIBUȚII ȘI TRANSPARENȚĂ --- */}

@@ -599,10 +599,17 @@ const COUNCIL_ACTIVITY_TYPES = [
     'meeting_minutes'
 ] as const;
 
+const HCL_DOCUMENT_TYPE = 'hcl';
+const HCL_DOCUMENT_STATUSES = ['consultare', 'adoptat'] as const;
+
 type CouncilActivityType = (typeof COUNCIL_ACTIVITY_TYPES)[number];
+type HclDocumentStatus = (typeof HCL_DOCUMENT_STATUSES)[number];
 
 const isCouncilActivityType = (value: string): value is CouncilActivityType =>
     COUNCIL_ACTIVITY_TYPES.includes(value as CouncilActivityType);
+
+const isHclDocumentStatus = (value: string): value is HclDocumentStatus =>
+    HCL_DOCUMENT_STATUSES.includes(value as HclDocumentStatus);
 
 const toQueryString = (value: unknown) => {
     if (Array.isArray(value)) return toStringValue(value[0]);
@@ -639,6 +646,12 @@ const parseBooleanValue = (value: unknown, defaultValue = true) => {
     if (['true', '1', 'yes', 'da', 'on'].includes(raw)) return true;
     if (['false', '0', 'no', 'nu', 'off'].includes(raw)) return false;
     return defaultValue;
+};
+
+const normalizeOptionalEnum = <T extends readonly string[]>(value: unknown, allowed: T) => {
+    const raw = normalizeSingleLine(toStringValue(value)).toLowerCase();
+    if (!raw) return null;
+    return (allowed as readonly string[]).includes(raw) ? (raw as T[number]) : null;
 };
 
 const createSlug = (value: string) =>
@@ -744,6 +757,72 @@ app.get('/api/documents', async (req: Request, res: Response): Promise<any> => {
     }
 });
 
+app.get('/api/hcl', async (req: Request, res: Response): Promise<any> => {
+    const reqId = (req as any).id;
+    const status = normalizeOptionalEnum(req.query.status, HCL_DOCUMENT_STATUSES);
+    const search = normalizeSingleLine(toQueryString(req.query.search || req.query.q)).slice(0, 150);
+    const year = parseYearValue(req.query.year);
+    const sort = normalizeSingleLine(toQueryString(req.query.sort)).toLowerCase();
+
+    const orderBy =
+        sort === 'oldest'
+            ? [{ publicationDate: 'asc' as const }, { adoptionDate: 'asc' as const }, { createdAt: 'asc' as const }]
+            : sort === 'title-asc'
+              ? [{ title: 'asc' as const }]
+              : sort === 'title-desc'
+                ? [{ title: 'desc' as const }]
+                : [{ publicationDate: 'desc' as const }, { adoptionDate: 'desc' as const }, { createdAt: 'desc' as const }];
+
+    try {
+        const documents = (await prisma.document.findMany({
+            where: {
+                category: 'hcl-transparenta',
+                isPublished: true,
+                ...(status ? { status } : {}),
+                ...(year ? { year } : {}),
+                ...(search
+                    ? {
+                          OR: [
+                              { title: { contains: search } },
+                              { content: { contains: search } },
+                              { number: { contains: search } }
+                          ]
+                      }
+                    : {})
+            },
+            orderBy
+        } as any)) as any[];
+
+        const normalizedDocuments = documents.map((document) => ({
+            ...document,
+            type: document.type || HCL_DOCUMENT_TYPE,
+            status: document.status || 'adoptat',
+            publicationDate: document.publicationDate || document.createdAt,
+            adoptionDate: document.adoptionDate || (document.status === 'consultare' ? null : document.createdAt)
+        }));
+
+        logger.debug(`Documente HCL preluate`, {
+            module: 'DOCUMENTS',
+            requestId: reqId,
+            details: {
+                status: status || 'all',
+                year: year || 'all',
+                search: search || '',
+                count: normalizedDocuments.length
+            }
+        });
+
+        return res.json(normalizedDocuments);
+    } catch (error) {
+        logger.error(`Eroare la preluarea documentelor HCL`, error, {
+            module: 'DOCUMENTS',
+            requestId: reqId,
+            details: { status: status || 'all', year: year || 'all' }
+        });
+        return res.status(500).json({ error: 'Nu am putut incarca documentele HCL.' });
+    }
+});
+
 app.post(
     '/api/documents',
     announcementsWriteLimiter,
@@ -759,6 +838,9 @@ app.post(
         const category = normalizeSingleLine(
             toStringValue(req.body?.servicePage || req.body?.category)
         ).slice(0, 100);
+        const type = normalizeSingleLine(toStringValue(req.body?.type)).slice(0, 64) || null;
+        const status = normalizeOptionalEnum(req.body?.status, HCL_DOCUMENT_STATUSES);
+        const number = normalizeSingleLine(toStringValue(req.body?.number)).slice(0, 64) || null;
         const content = toOptionalNormalizedText(req.body?.content);
         const uploadedFiles = collectUploadedFiles(req.files);
         const ownerId = normalizeSingleLine(
@@ -768,10 +850,19 @@ app.post(
         const authorNameInput = normalizeSingleLine(toStringValue(req.body?.authorName)).slice(0, 255);
         const authorName = authorNameInput || authUser?.name || null;
         const year = parseYearValue(req.body?.year) ?? new Date().getFullYear();
+        const publicationDate = parseDateValue(req.body?.publicationDate);
+        const adoptionDate = parseDateValue(req.body?.adoptionDate);
+        const consultationDeadline = parseDateValue(req.body?.consultationDeadline);
+        const isPublished = parseBooleanValue(req.body?.isPublished, true);
 
         if (!title || !category) {
             uploadedFiles.forEach((file) => safeDeleteFile(file.path));
             return res.status(400).json({ error: 'Titlul si categoria sunt obligatorii.' });
+        }
+
+        if (category === 'hcl-transparenta' && !status) {
+            uploadedFiles.forEach((file) => safeDeleteFile(file.path));
+            return res.status(400).json({ error: 'Statusul HCL trebuie sa fie consultare sau adoptat.' });
         }
 
         if (!isCitizenPost && !['ADMIN', 'EDITOR'].includes(role)) {
@@ -803,13 +894,20 @@ app.post(
                 data: {
                     title,
                     category,
+                    type: type || (category === 'hcl-transparenta' ? HCL_DOCUMENT_TYPE : null),
+                    status,
+                    number,
                     content,
                     fileUrl,
                     authorName,
                     ownerId,
                     officialSupport: ['ADMIN', 'EDITOR'].includes(role),
-                    year
-                }
+                    isPublished,
+                    year,
+                    publicationDate,
+                    adoptionDate,
+                    consultationDeadline
+                } as any
             });
 
             logger.success(`Document creat`, {

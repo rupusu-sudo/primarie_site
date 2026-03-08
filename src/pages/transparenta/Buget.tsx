@@ -413,7 +413,7 @@ export default function Buget() {
                 className="h-12 sm:h-14 px-6 rounded-xl text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5"
                 asChild
               >
-                <a href="#cautare-buget">Cauta in buget</a>
+                <a href="#cautare-buget">Cauta</a>
               </Button>
               <Button
                 size="lg"
@@ -449,7 +449,7 @@ export default function Buget() {
                 className="h-12 sm:h-14 px-8 rounded-xl text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5"
                 asChild
               >
-                <a href="#cautare-buget">Cauta in buget</a>
+                <a href="#cautare-buget">Cauta</a>
               </Button>
               <Button
                 size="lg"

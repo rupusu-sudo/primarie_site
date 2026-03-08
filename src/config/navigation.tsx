@@ -1,8 +1,8 @@
-import { 
-  Home, Building2, FileText, Info, 
-  LayoutDashboard, Megaphone, Map, History, 
-  Landmark, Users, Briefcase, Calculator, 
-  ScrollText, Phone, TreePine
+import {
+  Home, Building2, FileText, Info,
+  LayoutDashboard, Megaphone, Map, History,
+  Landmark, Users, Briefcase, Calculator,
+  ScrollText, Phone, TreePine, AlertTriangle,
 } from "lucide-react";
 
 export const NAVIGATION_ITEMS = [
@@ -35,8 +35,8 @@ export const NAVIGATION_ITEMS = [
       { label: "Cariere / Angajări", href: "/transparenta/cariere", icon: Briefcase },
     ]
   },
-  { 
-    label: "Servicii Publice", 
+  {
+    label: "Servicii Publice",
     href: "/servicii",
     icon: LayoutDashboard,
     children: [
@@ -46,6 +46,7 @@ export const NAVIGATION_ITEMS = [
       { label: "Registru Agricol", href: "/servicii/registru-agricol", icon: ScrollText },
       { label: "Asistență Socială", href: "/servicii/asistenta-sociala", icon: Users },
       { label: "Fond Locativ", href: "/servicii/fond-locativ", icon: Home },
+      { label: "Situații de Urgență (SVSU)", href: "/servicii/situatii-de-urgenta", icon: AlertTriangle },
     ]
   },
   {
@@ -53,8 +54,10 @@ export const NAVIGATION_ITEMS = [
     href: "/transparenta",
     icon: FileText,
     children: [
+      { label: "Anunțuri", href: "/anunturi", icon: Megaphone },
       { label: "Monitorul Oficial", href: "/monitorul-oficial", icon: ScrollText },
-      { label: "Anunțuri & Știri", href: "/anunturi", icon: Megaphone },
+      { label: "Publicații de vânzare", href: "/informatii-publice/publicatii-vanzare", icon: FileText },
+      { label: "Declarații de căsătorie", href: "/informatii-publice/declaratii-casatorie", icon: FileText },
       { label: "Hotărâri (HCL)", href: "/transparenta/hcl", icon: FileText },
       { label: "Buget și Achiziții", href: "/transparenta/buget", icon: Calculator },
       { label: "Contact", href: "/contact", icon: Phone },

@@ -2,13 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import HartaDigitala from "./pages/HartaDigitala";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./components/AuthContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import CookieConsent from "./components/CookieConsent";
 import { AccessibilityProvider } from "./components/AccessibilityProvider";
 import Index from "./pages/Index";
 import LoadingScreen from "./components/LoadingScreen";
@@ -54,6 +55,12 @@ const StareCivila = lazy(() => import("./pages/servicii/StareCivila"));
 const RegistruAgricol = lazy(() => import("./pages/servicii/RegistruAgricol"));
 const AsistentaSociala = lazy(() => import("./pages/servicii/AsistentaSociala"));
 const FondLocativ = lazy(() => import("./pages/servicii/FondLocativ"));
+const SituatiiDeUrgenta = lazy(() => import("./pages/servicii/SituatiiDeUrgenta"));
+const PublicatiiVanzare = lazy(() => import("./pages/informatii-publice/PublicatiiVanzare"));
+const DeclaratiiCasatorie = lazy(() => import("./pages/informatii-publice/DeclaratiiCasatorie"));
+const PoliticaDeConfidentialitate = lazy(() => import("./pages/PoliticaDeConfidentialitate"));
+const PoliticaDeCookies = lazy(() => import("./pages/PoliticaDeCookies"));
+const TermeniSiConditii = lazy(() => import("./pages/TermeniSiConditii"));
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -120,6 +127,21 @@ const App = () => (
                   <Route path="/servicii/registru-agricol" element={<RegistruAgricol />} />
                   <Route path="/servicii/asistenta-sociala" element={<AsistentaSociala />} />
                   <Route path="/servicii/fond-locativ" element={<FondLocativ />} />
+                  <Route path="/servicii/situatii-de-urgenta" element={<SituatiiDeUrgenta />} />
+
+                  <Route path="/informatii-publice/publicatii-vanzare" element={<PublicatiiVanzare />} />
+                  <Route path="/informatii-publice/declaratii-casatorie" element={<DeclaratiiCasatorie />} />
+                  <Route path="/politica-de-confidentialitate" element={<PoliticaDeConfidentialitate />} />
+                  <Route path="/politica-cookies" element={<PoliticaDeCookies />} />
+                  <Route path="/termeni-si-conditii" element={<TermeniSiConditii />} />
+                  <Route
+                    path="/servicii/publicatii-vanzare"
+                    element={<Navigate to="/informatii-publice/publicatii-vanzare" replace />}
+                  />
+                  <Route
+                    path="/servicii/declaratii-casatorie"
+                    element={<Navigate to="/informatii-publice/declaratii-casatorie" replace />}
+                  />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
@@ -127,6 +149,7 @@ const App = () => (
             </Suspense>
 
             <Footer />
+            <CookieConsent />
           </BrowserRouter>
         </AccessibilityProvider>
       </TooltipProvider>

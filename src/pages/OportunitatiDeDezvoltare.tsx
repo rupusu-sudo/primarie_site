@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PageLayout from "@/components/PageLayout";
+import { ServiceInfoGrid } from "@/components/servicii/ServiceInfoGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -431,19 +432,7 @@ const OportunitatiDeDezvoltare = () => {
           <h2 id="facts-title" className="sr-only">
             Indicatori rapizi pentru investiții
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-7">
-            {quickFacts.map((fact) => (
-              <div key={fact.label} className="stagger-item gsap-optimize flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">{fact.label}</p>
-                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">{fact.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ServiceInfoGrid items={quickFacts} />
         </section>
 
         <section id="parteneri" className="fade-up-scroll gsap-optimize border-t border-slate-200 pt-8 lg:pt-10" aria-labelledby="partners-title">

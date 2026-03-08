@@ -1,306 +1,340 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import {
-  Building2,
   MapPin,
   Phone,
   Mail,
+  Building2,
+  ArrowRight,
+  Github,
+  CodeXml,
   Clock,
-  Facebook,
-  ChevronRight,
-  FileText,
-  ScrollText,
-  ExternalLink,
-  MessageSquareWarning,
-  LayoutGrid,
-  Cookie,
-  ShieldCheck,
-  ArrowUp
+  Navigation,
+  Map,
+  type LucideIcon,
 } from "lucide-react";
+
+type FooterLink = {
+  label: string;
+  href: string;
+};
+
+type ContactItem = {
+  icon: LucideIcon;
+  value: React.ReactNode;
+  href?: string;
+};
+
+type QuickAction = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+type CreditItem = {
+  icon: LucideIcon;
+  href: string;
+  prefix: string;
+  accent: string;
+};
+
+const administrationLinks: FooterLink[] = [
+  { label: "Primarul Comunei", href: "/primar" },
+  { label: "Viceprimar", href: "/viceprimar" },
+  { label: "Secretar General", href: "/secretar" },
+  { label: "Consiliul Local", href: "/consiliul-local" },
+  { label: "Organigramă", href: "/organizare" },
+];
+
+const transparencyLinks: FooterLink[] = [
+  { label: "Hotărâri (HCL)", href: "/transparenta/hcl" },
+  { label: "Buget & Finanțe", href: "/buget" },
+  { label: "Achiziții Publice", href: "/achizitii" },
+  { label: "Concursuri", href: "/cariere" },
+  { label: "Declarații Avere", href: "/transparenta" },
+];
+
+const legalLinks: FooterLink[] = [
+  { label: "Confidențialitate", href: "/politica-de-confidentialitate" },
+  { label: "Cookies", href: "/politica-cookies" },
+  { label: "Termeni și condiții", href: "/termeni-si-conditii" },
+];
+
+const credits: CreditItem[] = [
+  {
+    icon: Github,
+    href: "https://github.com/rupusu-sudo",
+    prefix: "Design by",
+    accent: "rupusu-sudo",
+  },
+  {
+    icon: CodeXml,
+    href: "https://www.techconsult.ro/",
+    prefix: "Powered by",
+    accent: "Tech Consult",
+  },
+];
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const quickLinks = [
-    { to: "/servicii", label: "Portal Servicii" },
-    { to: "/anunturi", label: "Anunțuri Publice" },
-    { to: "/cariere", label: "Cariere & Concursuri" },
-    { to: "/contact", label: "Audiențe & Contact" },
-    { to: "/harta-site-ului", label: "Harta site-ului" },
+  const wazeLink = "https://waze.com/ul?q=Primaria+Almaj+Dolj&navigate=yes";
+  const mapsLink = "https://www.google.com/maps/dir/?api=1&destination=Primaria+Almaj+Dolj";
+
+  const contactItems: ContactItem[] = [
+    { icon: Phone, value: "0251 468 001", href: "tel:0251468001" },
+    { icon: Mail, value: "primaria@almaj.ro", href: "mailto:primaria@almaj.ro" },
+    {
+      icon: MapPin,
+      value: (
+        <>
+          Comuna Almăj, Județul Dolj
+          <br />
+          România
+        </>
+      ),
+    },
   ];
 
-  const transparencyLinks = [
-    { to: "/monitorul-oficial", label: "Monitorul Oficial Local", icon: FileText },
-    { to: "/transparenta/hcl", label: "Hotărâri Consiliu", icon: ScrollText },
-    // opționale (dacă există paginile):
-    { to: "/transparenta/buget", label: "Buget & Raportări", icon: FileText },
-    { to: "/transparenta/achizitii", label: "Achiziții Publice", icon: FileText },
+  const quickActions: QuickAction[] = [
+    { label: "Waze", href: wazeLink, icon: Navigation },
+    { label: "Google Maps", href: mapsLink, icon: Map },
   ];
-
-  const usefulExternal = [
-    { href: "https://dj.prefectura.mai.gov.ro/", label: "Prefectura Dolj" },
-    { href: "https://www.cjdolj.ro/", label: "Consiliul Județean Dolj" },
-  ];
-
-  const legalLinks = [
-    { to: "/termeni", label: "Termeni" },
-    { to: "/confidentialitate", label: "GDPR" },
-    { to: "/cookies", label: "Cookies", icon: Cookie },
-    // dacă vrei să păstrezi ANPC:
-    { href: "https://anpc.ro", label: "ANPC", external: true },
-    // opțional: ANSPDCP (autoritatea pe GDPR)
-    { href: "https://www.dataprotection.ro/", label: "ANSPDCP", external: true },
-  ];
-
-  const baseLink =
-    "inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 " +
-    "focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425] rounded-md";
-
-  const chevron =
-    "w-3.5 h-3.5 text-blue-600 group-hover:translate-x-1 transition-transform";
-
-  const scrollToTop = () => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
 
   return (
-    <footer className="relative overflow-hidden bg-[#0a1425] text-slate-300 font-sans">
-      {/* accent line */}
-      <div className="h-1 bg-gradient-to-r from-blue-700 via-cyan-500 to-blue-700" />
+    <footer className="relative mt-auto overflow-hidden border-t border-white/5 bg-black pb-12 pt-16 font-sans text-slate-300">
+      <div className="pointer-events-none absolute inset-0 bg-black" />
 
-      {/* subtle background glow */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[42rem] -translate-x-1/2 rounded-full bg-blue-700/15 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-[-12rem] h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
-
-      <div className="container mx-auto px-4 py-14 lg:py-16 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-          {/* 1) BRAND + CTA */}
-          <div className="space-y-6">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-blue-700/25 bg-blue-700/10 group-hover:bg-blue-700 transition-all duration-300 shadow-[0_0_0_1px_rgba(59,130,246,0.15)]">
-                <Building2 className="w-7 h-7 text-blue-400 group-hover:text-white transition-colors" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="mb-16 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <div className="flex flex-col space-y-6 lg:col-span-4">
+            <Link to="/" className="group flex w-fit items-center gap-4 outline-none">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-colors group-hover:bg-blue-500">
+                <Building2 className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-black text-xl text-white leading-tight uppercase tracking-tight">
-                  Primăria Almăj
+                <h3 className="text-xl font-bold leading-none tracking-tight text-white">
+                  Primăria
                 </h3>
-                <p className="text-[10px] text-blue-400 uppercase tracking-[0.22em] font-bold">
-                  Județul Dolj
+                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">
+                  Comunei Almăj
                 </p>
               </div>
             </Link>
 
-            <p className="text-sm text-slate-400 leading-relaxed font-medium">
-              Portalul oficial al administrației publice locale — transparență,
-              servicii digitale și comunicare rapidă cu cetățenii.
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-slate-400">
+              Administrație locală digitalizată, orientată spre dezvoltare și servicii publice eficiente.
             </p>
 
-            {/* CTA modern */}
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/sesizari"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 text-white font-black text-xs uppercase tracking-wider hover:bg-blue-600 transition-colors shadow-lg shadow-blue-700/15
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425]"
-              >
-                <MessageSquareWarning className="w-4 h-4" />
-                Raportează o problemă
-              </Link>
+            <div className="space-y-3 pt-2">
+              {contactItems.map((item) => {
+                const content = (
+                  <>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-700/80 bg-slate-950/50 text-slate-400 transition-colors group-hover:border-slate-600 group-hover:text-blue-200">
+                      <item.icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm font-medium leading-relaxed">
+                      {item.value}
+                    </span>
+                  </>
+                );
 
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook Primăria Almăj"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-slate-900/50 border border-white/10 hover:bg-blue-700 hover:border-blue-700 transition-all shadow-lg
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425]"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
+                if (item.href) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="group flex items-start gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/35 px-3.5 py-3 text-slate-400 transition-all duration-300 hover:border-slate-700 hover:bg-slate-900/55 hover:text-white"
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
+                  <div
+                    key={String(item.value)}
+                    className="group flex items-start gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/35 px-3.5 py-3 text-slate-400"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] text-slate-500">
-              <ShieldCheck className="w-4 h-4 text-blue-500" />
-              <span className="font-semibold">
-                Informații oficiale & actualizate
-              </span>
+            <div className="space-y-3 pt-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                Acces rapid
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {quickActions.map((action) => (
+                  <a
+                    key={action.label}
+                    href={action.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex min-h-[2.875rem] w-full items-center justify-center gap-2.5 rounded-full border border-slate-700/80 bg-transparent px-5 py-2.5 transition-all duration-300 hover:border-slate-500 hover:bg-white/5"
+                  >
+                    <action.icon className="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-white" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300 transition-colors group-hover:text-white">
+                      {action.label}
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* 2) NAVIGARE RAPIDĂ */}
-          <div>
-            <h4 className="font-black text-white text-xs uppercase tracking-[0.22em] mb-6 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-              Navigare Rapidă
+          <div className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Administrație
             </h4>
-
-            <ul className="space-y-3 text-sm font-bold">
-              {quickLinks.map((item) => (
-                <li key={item.to}>
-                  <Link to={item.to} className={`${baseLink} group`}>
-                    <ChevronRight className={chevron} />
-                    {item.label}
+            <ul className="space-y-4">
+              {administrationLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
+                  >
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
 
-            {/* mini “sitemap�? vibe */}
-            <div className="mt-6 p-4 rounded-2xl border border-white/10 bg-slate-900/25">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white mb-2">
-                <LayoutGrid className="w-4 h-4 text-blue-500" />
-                Acces rapid
+          <div className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Transparență
+            </h4>
+            <ul className="space-y-4">
+              {transparencyLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="space-y-6 pt-2 lg:col-span-4 lg:pt-0">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Informații Utile
+            </h4>
+
+            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3 text-slate-300">
+                <Clock className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-semibold tracking-wide text-white">
+                  Program de funcționare
+                </span>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Găsești rapid documente, anunțuri și formulare — optimizat pentru telefon.
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between text-slate-400">
+                  <span>Luni - Joi</span>
+                  <span className="font-medium text-slate-200">08:00 - 16:30</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-400">
+                  <span>Vineri</span>
+                  <span className="font-medium text-slate-200">08:00 - 14:00</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Link
+                to="/contact"
+                className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all hover:border-slate-500 hover:bg-white/5"
+              >
+                Contactează-ne
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-8 border-t border-slate-800 pt-10 lg:flex-row lg:justify-between lg:gap-10">
+          <div className="flex w-full flex-col items-center lg:w-auto lg:items-start">
+            <div className="w-full max-w-[400px]">
+              <p className="mb-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                LEGAL
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="https://anpc.ro/ce-este-sal/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[192px]"
+                >
+                  <img
+                    className="h-auto w-full bg-white p-1"
+                    src="https://wpfitness.eu/wp-content/uploads/2022/10/anpc-sal.png"
+                    alt="ANPC SAL - Soluționarea Alternativă a Litigiilor"
+                  />
+                </a>
+
+                <a
+                  href="https://ec.europa.eu/consumers/odr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[192px]"
+                >
+                  <img
+                    className="h-auto w-full bg-white p-1"
+                    src="https://wpfitness.eu/wp-content/uploads/2022/10/anpc-sol.png"
+                    alt="EU Online Dispute Resolution - Soluționarea online a litigiilor"
+                  />
+                </a>
+              </div>
+              <p className="mt-2 max-w-[400px] text-[10px] leading-relaxed text-slate-500">
+                Conform legislației privind soluționarea alternativă a litigiilor în domeniul protecției consumatorilor.
               </p>
             </div>
           </div>
 
-          {/* 3) TRANSPARENȚĂ */}
-          <div>
-            <h4 className="font-black text-white text-xs uppercase tracking-[0.22em] mb-6 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-              Transparență
-            </h4>
-
-            <ul className="space-y-3 text-sm font-bold">
-              {transparencyLinks.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.to}>
-                    <Link to={item.to} className={`${baseLink} group`}>
-                      <Icon className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-
-              <li className="pt-4">
-                <p className="text-[10px] text-slate-500 uppercase tracking-[0.22em] font-black mb-3">
-                  Legături utile
-                </p>
-                <div className="space-y-2">
-                  {usefulExternal.map((l) => (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${baseLink} text-xs`}
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      {l.label}
-                    </a>
-                  ))}
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          {/* 4) CONTACT CARD */}
-          <div className="rounded-3xl border border-white/10 bg-slate-900/35 p-6 shadow-xl shadow-black/20">
-            <h4 className="font-black text-white text-xs uppercase tracking-[0.22em] mb-5">
-              Informații Contact
-            </h4>
-
-            <address className="not-italic">
-              <ul className="space-y-4 text-sm">
-                <li className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                  <span className="text-slate-200/90 font-medium leading-relaxed">
-                    Str. Principală, Nr. 1, Comuna Almăj, Jud. Dolj
-                  </span>
-                </li>
-
-                <li className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-blue-500 shrink-0" />
-                  <a
-                    href="tel:+40251449234"
-                    className="text-slate-200 font-black tracking-tight hover:text-white transition-colors
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425] rounded-md"
-                  >
-                    0251 449 234
-                  </a>
-                </li>
-
-                <li className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-blue-500 shrink-0" />
-                  <a
-                    href="mailto:primariaalmaj@gmail.com"
-                    className="text-slate-200 text-xs font-black truncate hover:text-white transition-colors
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425] rounded-md"
-                  >
-                    primariaalmaj@gmail.com
-                  </a>
-                </li>
-
-                <li className="pt-4 border-t border-white/10">
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                    <div className="text-[11px] uppercase font-black tracking-wider">
-                      <p className="text-white mb-1">Program cu publicul</p>
-                      <p className="text-slate-500">L–J: 08:00 – 16:30</p>
-                      <p className="text-slate-500">V: 08:00 – 14:00</p>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </address>
-
-            <button
-              type="button"
-              onClick={scrollToTop}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-xs font-black uppercase tracking-wider text-slate-200 hover:bg-slate-950/60 hover:text-white transition-all
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1425]"
-            >
-              <ArrowUp className="w-4 h-4 text-blue-400" />
-              Sus în pagină
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* BOTTOM BAR */}
-      <div className="bg-[#070e1a] border-t border-white/10">
-        <div className="container mx-auto px-4 py-7">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-            <p className="text-[11px] text-slate-500 font-black uppercase tracking-widest">
-              © {currentYear} Instituția Primarului Comunei Almăj. Toate drepturile rezervate.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-widest">
-              {legalLinks.map((l) =>
-                l.external ? (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-500 hover:text-blue-400 transition-colors"
-                  >
-                    {l.label}
-                  </a>
-                ) : (
+          <div className="flex w-full flex-1 flex-col items-center gap-5">
+            <div className="flex w-full max-w-[500px] flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+              {legalLinks.map((link, index) => (
+                <React.Fragment key={link.href}>
+                  {index > 0 ? (
+                    <span className="hidden text-[11px] font-bold text-slate-700 sm:inline">
+                      •
+                    </span>
+                  ) : null}
                   <Link
-                    key={l.label}
-                    to={l.to}
-                    className="text-slate-500 hover:text-blue-400 transition-colors inline-flex items-center gap-1"
+                    to={link.href}
+                    className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 transition-colors hover:text-slate-300 sm:text-[11px]"
                   >
-                    {l.icon ? <l.icon className="w-3.5 h-3.5" /> : null}
-                    {l.label}
+                    {link.label}
                   </Link>
-                )
-              )}
+                </React.Fragment>
+              ))}
             </div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-slate-900/60">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Design:</span>
-              <span className="text-[10px] text-blue-400 font-black tracking-widest uppercase">
-                ruppz
-              </span>
+            <p className="text-center text-[11px] font-bold tracking-wide text-slate-600">
+              © {currentYear} Primăria Comunei Almăj. Toate drepturile rezervate.
+            </p>
+
+            <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center">
+              {credits.map((credit) => (
+                <a
+                  key={credit.href}
+                  href={credit.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-h-[2.75rem] items-center gap-2 rounded-full border border-slate-800 bg-slate-900/50 px-4 py-2.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-white"
+                >
+                  <credit.icon className="h-3.5 w-3.5" />
+                  <span>
+                    {credit.prefix}{" "}
+                    <span className="font-bold text-slate-300">{credit.accent}</span>
+                  </span>
+                </a>
+              ))}
             </div>
           </div>
         </div>

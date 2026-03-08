@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import PageLayout from "@/components/PageLayout";
+import { ServiceInfoGrid } from "@/components/servicii/ServiceInfoGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -224,24 +225,14 @@ const Primar = () => {
         </div>
         <section className="stagger-container" aria-labelledby="facts-title">
           <h2 id="facts-title" className="sr-only">Informații rapide</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[
+          <ServiceInfoGrid
+            items={[
               { label: "Program audiențe", value: mayorData.audienceSchedule, icon: Calendar },
               { label: "Locație", value: mayorData.location, icon: MapPin },
               { label: "Contact", value: mayorData.phone, icon: Phone },
-              { label: "Timp răspuns", value: mayorData.responseTime, icon: FileText }
-            ].map((fact, idx) => (
-              <div key={idx} className="stagger-item gsap-optimize flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">{fact.label}</p>
-                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">{fact.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              { label: "Timp răspuns", value: mayorData.responseTime, icon: FileText },
+            ]}
+          />
         </section>
         <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-8 lg:gap-10 border-t border-slate-200 pt-8 lg:pt-10 mt-0 sm:mt-1">
           <section id="audienta" className="fade-up-scroll gsap-optimize scroll-mt-24 lg:col-start-1" aria-labelledby="audienta-title">

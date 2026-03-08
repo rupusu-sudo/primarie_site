@@ -25,19 +25,28 @@ model Document {
   id              Int            @id @default(autoincrement())
   title           String         @db.VarChar(255)
   category        String         @db.VarChar(100)
+  type            String?        @db.VarChar(64)
+  status          String?        @db.VarChar(32)
+  number          String?        @db.VarChar(64)
   authorName      String?        @db.VarChar(255)
   content         String?        @db.Text
   fileUrl         String?        @db.VarChar(500)
   likes           Int            @default(0)
   officialSupport Boolean        @default(false)
+  isPublished     Boolean        @default(true)
   ownerId         String?        @db.VarChar(100)
   parentId        Int?
   parent          Document?      @relation("ThreadRelation", fields: [parentId], references: [id], onDelete: Cascade)
   replies         Document[]     @relation("ThreadRelation")
   documentLikes   DocumentLike[]
   year            Int?
+  publicationDate DateTime?
+  adoptionDate    DateTime?
+  consultationDeadline DateTime?
   createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
+  @@index([category, status, isPublished, year])
   @@map("Document")
 }
 
