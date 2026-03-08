@@ -170,19 +170,6 @@ export default function Anunturi() {
         .fromTo(".avizier-fade-in-left", { opacity: 0, x: -20 }, { opacity: 1, x: 0, stagger: 0.08 })
         .fromTo(".avizier-fade-in-right", { opacity: 0, x: 20 }, { opacity: 1, x: 0 }, "-=0.4");
 
-      gsap.fromTo(
-        ".avizier-stagger-item",
-        { opacity: 0, y: 15 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.08,
-          duration: 0.5,
-          ease: "power2.out",
-          scrollTrigger: { trigger: ".avizier-stagger-container", start: "top 85%" },
-        },
-      );
-
       gsap.utils.toArray<HTMLElement>(".avizier-fade-up-scroll").forEach((element) => {
         gsap.fromTo(
           element,
@@ -342,29 +329,6 @@ export default function Anunturi() {
             </div>
           </div>
         </div>
-
-        <section className="avizier-stagger-container" aria-labelledby="avizier-facts-title">
-          <h2 id="avizier-facts-title" className="sr-only">
-            Repere rapide
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {facts.map((fact) => (
-              <div key={fact.label} className="avizier-stagger-item flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <fact.icon className="w-5 h-5" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-1">
-                    {fact.label}
-                  </p>
-                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-snug">
-                    {fact.value}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-8 lg:gap-10 border-t border-slate-200 pt-8 lg:pt-10 mt-0 sm:mt-1">
           <section
