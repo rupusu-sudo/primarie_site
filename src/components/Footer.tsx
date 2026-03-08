@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   MapPin,
   Phone,
   Mail,
-  Building2,
   ArrowRight,
   Github,
   CodeXml,
@@ -75,11 +77,15 @@ const credits: CreditItem[] = [
   },
 ];
 
+gsap.registerPlugin(useGSAP, ScrollTrigger);
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement | null>(null);
 
   const wazeLink = "https://waze.com/ul?q=Primaria+Almaj+Dolj&navigate=yes";
-  const mapsLink = "https://www.google.com/maps/dir/?api=1&destination=Primaria+Almaj+Dolj";
+  const mapsLink =
+    "https://www.google.com/maps/dir/?api=1&destination=Primaria+Almaj+Dolj";
 
   const contactItems: ContactItem[] = [
     { icon: Phone, value: "0251 468 001", href: "tel:0251468001" },
@@ -101,17 +107,48 @@ const Footer = () => {
     { label: "Google Maps", href: mapsLink, icon: Map },
   ];
 
+  useGSAP(
+    () => {
+      const elements = gsap.utils.toArray<HTMLElement>("[data-footer-item]");
+
+      gsap.set(elements, { willChange: "transform, opacity" });
+
+      gsap.fromTo(
+        elements,
+        { opacity: 0, y: 22 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          ease: "power2.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: "top 88%",
+            once: true,
+          },
+        },
+      );
+    },
+    { scope: footerRef },
+  );
+
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-white/5 bg-black pb-12 pt-16 font-sans text-slate-300">
-      <div className="pointer-events-none absolute inset-0 bg-black" />
+    <footer
+      ref={footerRef}
+      className="relative mt-auto overflow-hidden bg-slate-900 pb-12 pt-16 font-sans text-slate-300"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-slate-900" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="mb-16 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-          <div className="flex flex-col space-y-6 lg:col-span-4">
+        <div className="mb-16 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-12 lg:gap-8">
+          <div data-footer-item className="col-span-2 flex flex-col space-y-6 lg:col-span-4">
             <Link to="/" className="group flex w-fit items-center gap-4 outline-none">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-colors group-hover:bg-blue-500">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
+              <img
+                src="/flavicon.png"
+                alt="Stema Almaj"
+                className="h-12 w-12 object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14"
+              />
               <div>
                 <h3 className="text-xl font-bold leading-none tracking-tight text-white">
                   Primăria
@@ -123,7 +160,8 @@ const Footer = () => {
             </Link>
 
             <p className="max-w-sm text-sm font-medium leading-relaxed text-slate-400">
-              Administrație locală digitalizată, orientată spre dezvoltare și servicii publice eficiente.
+              Administrație locală digitalizată, orientată spre dezvoltare și servicii
+              publice eficiente.
             </p>
 
             <div className="space-y-3 pt-2">
@@ -185,7 +223,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
+          <div data-footer-item className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
             <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
               Administrație
             </h4>
@@ -203,7 +241,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
+          <div data-footer-item className="space-y-6 pt-2 lg:col-span-2 lg:pt-0">
             <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
               Transparență
             </h4>
@@ -221,12 +259,12 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="space-y-6 pt-2 lg:col-span-4 lg:pt-0">
+          <div data-footer-item className="col-span-2 space-y-6 pt-2 lg:col-span-4 lg:pt-0">
             <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Informații Utile
+              Informații utile
             </h4>
 
-            <div className="space-y-4 border-t border-slate-900 pt-4">
+            <div className="space-y-4 pt-4">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <Clock className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-semibold tracking-wide text-white">
@@ -248,7 +286,7 @@ const Footer = () => {
             <div className="pt-2">
               <Link
                 to="/contact"
-                className="group inline-flex items-center gap-2 border-b border-slate-700 pb-2 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-colors hover:border-slate-500 hover:text-blue-200"
+                className="group inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-colors hover:text-blue-200"
               >
                 Contactează-ne
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -258,22 +296,25 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col items-center gap-8 border-t border-slate-800 pt-10 lg:flex-row lg:justify-between lg:gap-10">
-          <div className="flex w-full flex-col items-center lg:w-auto lg:items-start">
-            <div className="w-full max-w-[400px]">
+          <div
+            data-footer-item
+            className="flex w-full flex-col items-center lg:w-auto lg:items-start"
+          >
+            <div className="w-full max-w-[336px] sm:max-w-[368px]">
               <p className="mb-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
                 LEGAL
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-3">
                 <a
                   href="https://anpc.ro/ce-este-sal/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[192px]"
+                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[176px]"
                 >
                   <img
-                    className="h-auto w-full bg-white p-1"
+                    className="h-auto w-full bg-white p-0.5 sm:p-1"
                     src="https://wpfitness.eu/wp-content/uploads/2022/10/anpc-sal.png"
-                    alt="ANPC SAL - Soluționarea Alternativă a Litigiilor"
+                    alt="ANPC SAL - Solutionarea Alternativa a Litigiilor"
                   />
                 </a>
 
@@ -281,23 +322,27 @@ const Footer = () => {
                   href="https://ec.europa.eu/consumers/odr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[192px]"
+                  className="block w-full overflow-hidden rounded-lg bg-white transition-transform hover:scale-[1.02] sm:max-w-[176px]"
                 >
                   <img
-                    className="h-auto w-full bg-white p-1"
+                    className="h-auto w-full bg-white p-0.5 sm:p-1"
                     src="https://wpfitness.eu/wp-content/uploads/2022/10/anpc-sol.png"
-                    alt="EU Online Dispute Resolution - Soluționarea online a litigiilor"
+                    alt="EU Online Dispute Resolution - Solutionarea online a litigiilor"
                   />
                 </a>
               </div>
-              <p className="mt-2 max-w-[400px] text-[10px] leading-relaxed text-slate-500">
-                Conform legislației privind soluționarea alternativă a litigiilor în domeniul protecției consumatorilor.
+              <p className="mt-2 max-w-[336px] text-[9px] leading-relaxed text-slate-500 sm:max-w-[368px] sm:text-[10px]">
+                Conform legislatiei privind solutionarea alternativa a litigiilor in
+                domeniul protectiei consumatorilor.
               </p>
             </div>
           </div>
 
-          <div className="flex w-full flex-1 flex-col items-center gap-5">
-            <div className="flex w-full max-w-[500px] flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+          <div
+            data-footer-item
+            className="flex w-full flex-1 flex-col items-center gap-5 lg:flex-row lg:flex-wrap lg:items-center lg:justify-end lg:gap-x-6 lg:gap-y-3"
+          >
+            <div className="flex w-full max-w-[500px] flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center lg:w-auto lg:max-w-none lg:justify-end lg:text-right">
               {legalLinks.map((link, index) => (
                 <React.Fragment key={link.href}>
                   {index > 0 ? (
@@ -315,11 +360,11 @@ const Footer = () => {
               ))}
             </div>
 
-            <p className="text-center text-[11px] font-bold tracking-wide text-slate-600">
+            <p className="text-center text-[11px] font-bold tracking-wide text-slate-600 lg:text-right">
               © {currentYear} Primăria Comunei Almăj. Toate drepturile rezervate.
             </p>
 
-            <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center sm:gap-5">
+            <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center sm:gap-5 lg:justify-end">
               {credits.map((credit) => (
                 <a
                   key={credit.href}
