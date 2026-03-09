@@ -1,134 +1,134 @@
-import { 
-  FileText, Banknote, HardHat, Baby, Tractor, 
-  HeartHandshake, Calendar, MessageSquare, ChevronRight, ArrowRight 
+import {
+  ArrowRight,
+  Banknote,
+  Calendar,
+  FileText,
+  HardHat,
+  HeartHandshake,
+  MessageSquare,
+  ScrollText,
+  Tractor,
 } from "lucide-react";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useGsapSectionReveal } from "@/hooks/useGsapSectionReveal";
 
 const services = [
   {
-    icon: <FileText className="w-6 h-6" />,
-    title: "Acte Necesare",
-    description: "Lista documentelor pentru diverse solicitări.",
-    color: "bg-blue-600",
-    href: "/servicii", 
-    btnText: "Accesează"
+    title: "Acte și formulare",
+    description: "Documente și cereri utilizate frecvent în relația cu primăria.",
+    href: "/servicii",
+    icon: FileText,
   },
   {
-    icon: <Banknote className="w-6 h-6" />,
-    title: "Taxe și Impozite",
-    description: "Plătește online pe Ghișeul.ro sau vezi detalii.",
-    color: "bg-emerald-600",
+    title: "Taxe și impozite locale",
+    description: "Plata taxelor, informații despre termene și servicii fiscale.",
     href: "/servicii/taxe",
-    btnText: "Deschide"
+    icon: Banknote,
   },
   {
-    icon: <HardHat className="w-6 h-6" />,
-    title: "Urbanism",
-    description: "Certificate, autorizații și planuri urbanistice.",
-    color: "bg-amber-500",
+    title: "Urbanism și construcții",
+    description:
+      "Certificate de urbanism, autorizații și informații despre documentațiile necesare.",
     href: "/servicii/urbanism",
-    btnText: "Accesează"
+    icon: HardHat,
   },
   {
-    icon: <Baby className="w-6 h-6" />,
-    title: "Stare Civilă",
-    description: "Acte de stare civilă, căsătorii, nașteri.",
-    color: "bg-rose-500",
-    href: "/servicii/stare-civila",
-    btnText: "Accesează"
-  },
-  {
-    icon: <Tractor className="w-6 h-6" />,
-    title: "Registru Agricol",
-    description: "Adeverințe și înscrieri în registrul agricol.",
-    color: "bg-green-600",
+    title: "Registrul agricol",
+    description: "Adeverințe, înscrieri și informații pentru terenuri și exploatații agricole.",
     href: "/servicii/registru-agricol",
-    btnText: "Accesează"
+    icon: Tractor,
   },
   {
-    icon: <HeartHandshake className="w-6 h-6" />,
-    title: "Asistență Socială",
-    description: "Ajutoare sociale și servicii comunitare.",
-    color: "bg-purple-600",
+    title: "Asistență socială",
+    description: "Beneficii sociale, ajutoare și servicii oferite comunității.",
     href: "/servicii/asistenta-sociala",
-    btnText: "Accesează"
+    icon: HeartHandshake,
   },
   {
-    icon: <Calendar className="w-6 h-6" />,
-    title: "Programări Audiențe",
-    description: "Programează-te la audiențe la primar.",
-    color: "bg-indigo-600",
-    href: "/contact", // Audiențele sunt de obicei la Contact
-    btnText: "Accesează"
+    title: "Programări și sesizări online",
+    description: "Trimite solicitări, sesizări sau programează o audiență.",
+    href: "/contact",
+    icon: MessageSquare,
   },
   {
-    icon: <MessageSquare className="w-6 h-6" />,
-    title: "Sesizări Online",
-    description: "Trimite sesizări și petiții online.",
-    color: "bg-cyan-600",
-    href: "/contact", // Sau "/sesizari" dacă vom crea pagina
-    btnText: "Accesează"
-  }
+    title: "Stare civilă",
+    description: "Informații despre certificate, căsătorii și alte proceduri.",
+    href: "/servicii/stare-civila",
+    icon: Calendar,
+  },
+  {
+    title: "Hotărâri și decizii locale",
+    description: "Acces la hotărârile consiliului local și alte documente oficiale.",
+    href: "/transparenta/hcl",
+    icon: ScrollText,
+  },
 ];
 
-const ServicesSection = () => {
+export default function ServicesSection() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useGsapSectionReveal(sectionRef);
+
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        {/* Header Secțiune */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-4">
-             <span className="text-blue-600 font-bold text-sm px-3 uppercase tracking-wider">Servicii Digitale</span>
+    <section
+      ref={sectionRef}
+      className="w-full bg-slate-50 pt-6 pb-10 sm:pt-8 sm:pb-12 lg:pt-10 lg:pb-16"
+      aria-labelledby="services-title"
+    >
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl" data-reveal="copy">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-blue-700">
+              Servicii publice
+            </p>
+            <h2
+              id="services-title"
+              className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl"
+            >
+              Serviciile principale sunt prezentate direct, fără pași inutili de navigare.
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-700 sm:text-lg">
+              Homepage-ul funcționează ca un punct de orientare rapidă, de unde cetățenii pot ajunge
+              imediat la cele mai căutate secțiuni ale portalului.
+            </p>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">SERVICII PENTRU CETĂȚENI</h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Cum vă putem ajuta? Accesați rapid serviciile primăriei și informațiile de care aveți nevoie.
-          </p>
+
+          <Link
+            to="/servicii"
+            data-reveal="item"
+            className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 transition-colors hover:text-blue-900"
+          >
+            Vezi toate serviciile
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        {/* Grid Servicii (4 coloane pe ecrane mari pentru a acomoda 8 elemente) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => (
-            <Link key={index} to={service.href} className="group h-full">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 border-slate-100 group-hover:-translate-y-1 overflow-hidden flex flex-col">
-                <CardContent className="p-6 flex-1 flex flex-col">
-                  {/* Iconița */}
-                  <div className={`${service.color} w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-5 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                    {service.icon}
-                  </div>
-                  
-                  {/* Titlu și Descriere */}
-                  <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">
+        <div className="mt-8 grid gap-x-8 lg:grid-cols-2" data-reveal="group">
+          {services.map((service) => (
+            <Link
+              key={service.href}
+              to={service.href}
+              className="group flex items-start gap-4 border-t border-slate-200 py-5 transition-colors"
+            >
+              <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-blue-700">
+                <service.icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-4">
+                  <span className="text-base font-black text-slate-900 transition-colors group-hover:text-blue-800 sm:text-lg">
                     {service.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 mb-6 leading-relaxed flex-1">
-                    {service.description}
-                  </p>
-                  
-                  {/* Butonul de Acțiune */}
-                  <div className="mt-auto pt-4 border-t border-slate-50 w-full flex items-center justify-between text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                    {service.btnText}
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </div>
-                </CardContent>
-              </Card>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-700" />
+                </span>
+                <span className="mt-2 block max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+                  {service.description}
+                </span>
+              </span>
             </Link>
           ))}
-        </div>
-
-        {/* Buton "Toate serviciile" */}
-        <div className="mt-12 text-center">
-          <Button asChild variant="outline" size="lg" className="rounded-full px-8 border-slate-300 text-slate-700 hover:text-primary hover:border-primary">
-            <Link to="/servicii">
-              Toate serviciile <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
         </div>
       </div>
     </section>
   );
-};
-
-export default ServicesSection;
+}

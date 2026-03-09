@@ -82,6 +82,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const footerRef = useRef<HTMLElement | null>(null);
+  const hasAnimatedRef = useRef(false);
 
   const wazeLink = "https://waze.com/ul?q=Primaria+Almaj+Dolj&navigate=yes";
   const mapsLink =
@@ -109,26 +110,51 @@ const Footer = () => {
 
   useGSAP(
     () => {
-      const elements = gsap.utils.toArray<HTMLElement>("[data-footer-item]");
+      const footer = footerRef.current;
+      if (!footer) {
+        return;
+      }
 
-      gsap.set(elements, { willChange: "transform, opacity" });
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReducedMotion) {
+        return;
+      }
 
-      gsap.fromTo(
-        elements,
-        { opacity: 0, y: 22 },
-        {
-          opacity: 1,
-          y: 0,
+      const elements = gsap.utils.toArray<HTMLElement>("[data-footer-item]", footer);
+      if (!elements.length) {
+        return;
+      }
+
+      const animateItems = () => {
+        if (hasAnimatedRef.current) {
+          return;
+        }
+
+        hasAnimatedRef.current = true;
+        gsap.set(elements, { willChange: "transform, opacity" });
+        gsap.from(elements, {
+          opacity: 0,
+          y: 22,
           duration: 0.75,
           ease: "power2.out",
           stagger: 0.1,
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top 88%",
-            once: true,
-          },
-        },
-      );
+          clearProps: "transform,opacity,willChange",
+        });
+      };
+
+      if (footer.getBoundingClientRect().top <= window.innerHeight * 0.88) {
+        animateItems();
+        return;
+      }
+
+      const trigger = ScrollTrigger.create({
+        trigger: footer,
+        start: "top 88%",
+        once: true,
+        onEnter: animateItems,
+      });
+
+      return () => trigger.kill();
     },
     { scope: footerRef },
   );

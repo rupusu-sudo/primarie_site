@@ -54,7 +54,7 @@ const HeroSection = () => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[auto] lg:min-h-[700px] flex flex-col justify-center items-center overflow-hidden bg-slate-50 pt-14 md:pt-24 pb-12"
+      className="relative w-full min-h-[auto] lg:min-h-[700px] flex flex-col justify-center items-center overflow-hidden bg-slate-50 pt-8 md:pt-24 pb-10 md:pb-12"
     >
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div ref={bgImageRef} className="absolute inset-0 w-full h-full opacity-100">
@@ -92,7 +92,7 @@ const HeroSection = () => {
       </div>
 
       <div className="content-layer relative z-10 container mx-auto px-4 flex flex-col items-center text-center">
-        <div className="hero-fade-in inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-blue-900 shadow-sm mb-4 md:mb-6 uppercase tracking-widest">
+        <div className="hero-fade-in inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-blue-900 shadow-sm mb-3 md:mb-6 uppercase tracking-widest">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
@@ -100,25 +100,25 @@ const HeroSection = () => {
           Portal Oficial Digital
         </div>
 
-        <div className="mb-8 relative flex flex-col items-center">
-          <div className="overflow-hidden px-4 pt-4 -mb-1 md:mb-0">
-            <h1 ref={addToTitleLines} className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 leading-[1.1]">
+        <div className="mb-5 md:mb-8 relative flex flex-col items-center">
+          <div className="overflow-hidden px-4 pt-2 md:pt-4 -mb-1 md:mb-0">
+            <h1 ref={addToTitleLines} className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 leading-[1.02] md:leading-[1.1]">
               PRIMĂRIA
             </h1>
           </div>
-          <div className="overflow-hidden px-0 pt-0 pb-2">
-            <h1 ref={addToTitleLines} className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 leading-[1.2] py-3">
+          <div className="overflow-hidden px-0 pt-0 pb-1 md:pb-2">
+            <h1 ref={addToTitleLines} className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 leading-[1.05] md:leading-[1.2] py-2 md:py-3">
               ALMĂJ
             </h1>
           </div>
         </div>
 
-        <p className="hero-fade-in text-lg md:text-xl text-slate-600 max-w-2xl text-center leading-relaxed font-medium mb-12 py-1">
+        <p className="hero-fade-in text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl text-center leading-relaxed font-medium mb-8 md:mb-12 py-1">
           Administratie transparenta, la un click distanta. <br className="hidden md:block" />
           Rezolva problemele comunitatii direct de pe telefon.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl mb-10 md:mb-12">
           <ModernCard to="/servicii/taxe" icon={<CreditCard />} title="Taxe" subtitle="Plata Online" accent="blue" />
           <ModernCard to="/monitorul-oficial" icon={<FileText />} title="Acte" subtitle="Monitor Oficial" accent="indigo" />
           <ModernCard to="/servicii/urbanism" icon={<Building2 />} title="Urbanism" subtitle="Autorizatii" accent="emerald" />

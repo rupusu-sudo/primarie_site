@@ -1,346 +1,306 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { ArrowRight, Loader2, Megaphone } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import {
-  ChevronRight,
-  ArrowRight,
-  Megaphone,
-  Clock,
-  Loader2,
-  AlertCircle,
-  FileText,
-  Info,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { API_URL } from "@/config/api";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useGsapSectionReveal } from "@/hooks/useGsapSectionReveal";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 
 interface Announcement {
   id: number;
   title: string;
   content: string;
   category: string;
-  fileUrl?: string | null;
   createdAt: string;
 }
 
-const chunk = <T,>(items: T[], size: number): T[][] => {
-  const result: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    result.push(items.slice(i, i + size));
+const FETCH_INTERVAL = 30 * 60 * 1000;
+
+const previewAnnouncements: Announcement[] = [
+  {
+    id: -1,
+    title: "Exemplu de anunț: întrerupere temporară a alimentării cu apă",
+    content:
+      "În data de 12 martie 2026, în intervalul 09:00 – 14:00, alimentarea cu apă va fi întreruptă temporar pentru lucrări de mentenanță în rețeaua locală.",
+    category: "Model de afișare",
+    createdAt: "2026-03-12",
+  },
+  {
+    id: -2,
+    title: "Exemplu de anunț: program special pentru depunerea declarațiilor",
+    content:
+      "În perioada 18 – 22 martie 2026, programul cu publicul pentru preluarea documentelor fiscale va fi extins până la ora 18:00.",
+    category: "Model de afișare",
+    createdAt: "2026-03-18",
+  },
+  {
+    id: -3,
+    title: "Exemplu de anunț: consultare publică pentru proiect local",
+    content:
+      "Primăria invită locuitorii să transmită observații privind propunerea de amenajare a spațiului public din zona centrală a comunei.",
+    category: "Model de afișare",
+    createdAt: "2026-03-20",
+  },
+];
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("ro-RO", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(value));
+
+const formatToday = (value: Date) =>
+  new Intl.DateTimeFormat("ro-RO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+    .format(value)
+    .toLocaleUpperCase("ro-RO");
+
+const getExcerpt = (value: string, maxLength = 170) => {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
   }
-  return result;
+
+  return `${normalized.slice(0, maxLength).trimEnd()}...`;
 };
 
-const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case "Urgent":
-      return <AlertCircle className="w-3.5 h-3.5 mr-1" />;
-    case "General":
-      return <FileText className="w-3.5 h-3.5 mr-1" />;
-    case "Informativ":
-      return <Info className="w-3.5 h-3.5 mr-1" />;
-    default:
-      return <Megaphone className="w-3.5 h-3.5 mr-1" />;
-  }
-};
+function AnnouncementEntry({
+  announcement,
+  compact = false,
+}: {
+  announcement: Announcement;
+  compact?: boolean;
+}) {
+  return (
+    <article
+      className={
+        compact
+          ? "flex h-full flex-col rounded-[28px] border border-slate-200 bg-slate-50/80 p-5"
+          : "flex h-full flex-col border-t border-slate-200 pt-5 md:min-h-[260px]"
+      }
+    >
+      <Link to="/anunturi" className="group flex h-full flex-col">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+          <span className="text-blue-700">{announcement.category || "Informare"}</span>
+          <span>{formatDate(announcement.createdAt)}</span>
+        </div>
 
-const AnnouncementsSection = () => {
-  const containerRef = useRef(null);
+        <h3 className="mt-4 text-xl font-black tracking-tight text-slate-900 transition-colors group-hover:text-blue-800 sm:text-2xl">
+          {announcement.title}
+        </h3>
 
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+          {getExcerpt(announcement.content)}
+        </p>
+
+        <div className="mt-auto pt-6">
+          <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors group-hover:text-blue-700">
+            Citește anunțul
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </span>
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+export default function AnnouncementsSection() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mobileApi, setMobileApi] = useState<CarouselApi>();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const isMobile = useIsMobile();
+  const today = new Date();
+  const todayLabel = formatToday(today);
+  const todayIso = today.toISOString().slice(0, 10);
+  const hasLiveAnnouncements = announcements.length > 0;
+  const visibleAnnouncements = hasLiveAnnouncements ? announcements : previewAnnouncements;
 
-  const fetchAnnouncements = useCallback(async (isBackground = false) => {
+  useGsapSectionReveal(sectionRef, { dependencies: [isLoading, visibleAnnouncements.length] });
+
+  const fetchAnnouncements = useCallback(async (background = false) => {
     try {
       const response = await fetch(`${API_URL}/api/announcements`);
-      if (!response.ok) throw new Error("Network error");
+      if (!response.ok) {
+        throw new Error("Failed to fetch announcements");
+      }
 
       const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const sorted = data
-          .slice()
-          .sort(
-            (a: Announcement, b: Announcement) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        const topNine = sorted.slice(0, 9);
+      if (!Array.isArray(data)) {
+        setAnnouncements([]);
+        return;
+      }
 
-        setAnnouncements((prev) =>
-          JSON.stringify(prev) === JSON.stringify(topNine) ? prev : topNine
-        );
-      } else {
+      const latest = data
+        .slice()
+        .sort(
+          (a: Announcement, b: Announcement) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 3);
+
+      setAnnouncements(latest);
+    } catch (error) {
+      console.error("Announcement fetch error:", error);
+      if (!background) {
         setAnnouncements([]);
       }
-    } catch (error) {
-      console.error("Fetch error:", error);
     } finally {
-      if (!isBackground) setIsInitialLoading(false);
+      if (!background) {
+        setIsLoading(false);
+      }
     }
-  }, [API_URL]);
-
-  // Interval mare pentru a evita spam-ul rețelei: 30 de minute
-  const FETCH_INTERVAL = 30 * 60 * 1000;
+  }, []);
 
   useEffect(() => {
     fetchAnnouncements(false);
-    const interval = setInterval(() => fetchAnnouncements(true), FETCH_INTERVAL);
-    return () => clearInterval(interval);
+    const intervalId = window.setInterval(() => fetchAnnouncements(true), FETCH_INTERVAL);
+    return () => window.clearInterval(intervalId);
   }, [fetchAnnouncements]);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 768px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  const visibleAnnouncements = useMemo(() => {
-    const limit = isMobile ? 3 : 9;
-    return announcements.slice(0, limit);
-  }, [announcements, isMobile]);
-
-  const itemsPerSlide = isMobile ? 1 : 3;
-  const slides = useMemo(
-    () => chunk(visibleAnnouncements, itemsPerSlide),
-    [visibleAnnouncements, itemsPerSlide]
-  );
-  const totalSlides = slides.length;
-
-  useEffect(() => {
-    setActiveSlide(0);
-  }, [itemsPerSlide, visibleAnnouncements.length]);
-
-  useEffect(() => {
-    if (activeSlide >= totalSlides && totalSlides > 0) {
-      setActiveSlide(0);
+    if (!mobileApi) {
+      return;
     }
-  }, [activeSlide, totalSlides]);
+
+    const handleSelect = () => {
+      setSelectedIndex(mobileApi.selectedScrollSnap());
+    };
+
+    handleSelect();
+    mobileApi.on("select", handleSelect);
+    mobileApi.on("reInit", handleSelect);
+
+    return () => {
+      mobileApi.off("select", handleSelect);
+      mobileApi.off("reInit", handleSelect);
+    };
+  }, [mobileApi]);
 
   useEffect(() => {
-    if (isPaused || totalSlides <= 1) return;
-    const autoDelay = Math.max(4000, Math.round(11000 / Math.max(1, totalSlides)));
-    const timer = setInterval(
-      () => setActiveSlide((prev) => (prev + 1) % totalSlides),
-      autoDelay
-    );
-    return () => clearInterval(timer);
-  }, [isPaused, totalSlides]);
+    if (!isMobile || !mobileApi || visibleAnnouncements.length < 2) {
+      return;
+    }
 
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: ".section-header",
-        start: "top 90%",
-        toggleActions: "play none none reverse",
-      },
-    });
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      return;
+    }
 
-    tl.from(".reveal-text", {
-      y: "120%",
-      duration: 0.8,
-      ease: "power3.out",
-      stagger: 0.1,
-    })
-      .from(".header-desc", { opacity: 0, y: 10, duration: 0.6 }, "-=0.4")
-      .from(
-        ".header-btn",
-        { opacity: 0, x: -10, duration: 0.6, ease: "power2.out" },
-        "-=0.4"
-      );
-  }, { scope: containerRef });
+    const autoplayId = window.setInterval(() => {
+      mobileApi.scrollNext();
+    }, 3800);
 
-  useGSAP(
-    () => {
-      if (isInitialLoading || visibleAnnouncements.length === 0) return;
-
-      const ctx = gsap.context(() => {
-        ScrollTrigger.refresh();
-        gsap.from(".announcement-card", {
-          scrollTrigger: {
-            trigger: ".cards-container",
-            start: "top 85%",
-          },
-          y: 40,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "back.out(1.1)",
-          clearProps: "all",
-        });
-      });
-
-      return () => ctx.revert();
-    },
-    { scope: containerRef, dependencies: [isInitialLoading, visibleAnnouncements] }
-  );
+    return () => window.clearInterval(autoplayId);
+  }, [isMobile, mobileApi, visibleAnnouncements.length]);
 
   return (
     <section
-      ref={containerRef}
-      className="pt-8 pb-12 md:py-16 bg-white relative z-20 -mt-8 md:-mt-4 overflow-hidden"
+      ref={sectionRef}
+      className="w-full bg-white py-10 sm:py-12 lg:py-16"
+      aria-labelledby="announcements-title"
     >
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="section-header flex flex-col md:flex-row items-start md:items-end justify-between mb-8 gap-6">
-          <div className="max-w-2xl overflow-hidden relative">
-            <div className="flex items-center gap-2 mb-2 reveal-text">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-600">
-                <Megaphone className="w-3.5 h-3.5" />
-              </span>
-              <span className="text-blue-600 font-bold tracking-widest text-[10px] uppercase">
-                Informații Utile
-              </span>
-              {!isPaused && (
-                <span className="flex h-2 w-2 ml-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-              )}
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl" data-reveal="copy">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-blue-700">
+              <Megaphone className="h-3.5 w-3.5" />
+              Anunțuri și informări
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium text-slate-500 sm:text-[15px]">
+              <span>Astăzi</span>
+              <span className="h-1 w-1 rounded-full bg-slate-300" aria-hidden="true" />
+              <time dateTime={todayIso} className="text-slate-700">
+                {todayLabel}
+              </time>
             </div>
-
-            <div className="overflow-hidden pb-1">
-              <h2 className="reveal-text text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-                Ultimele <span className="text-blue-600">Anunțuri</span>
-              </h2>
-            </div>
-
-            <div className="header-desc mt-3 flex flex-col gap-3">
-              <p className="text-slate-500 text-sm font-medium max-w-md leading-relaxed">
-                Rămâneți conectați cu deciziile administrative și noutățile din comunitate, actualizate în timp real.
-              </p>
-
-            </div>
+            <h2
+              id="announcements-title"
+              className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl"
+            >
+              Anunțurile recente prezintă cele mai noi informații publicate de primărie.
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-700 sm:text-lg">
+              Aici puteți găsi rapid actualizări despre program, lucrări, decizii administrative și
+              alte noutăți importante pentru comunitate.
+            </p>
           </div>
 
-          <div className="header-btn w-full md:w-auto opacity-0">
-            <Link to="/anunturi" className="w-full md:w-auto inline-block">
-              <Button
-                variant="ghost"
-                className="w-full md:w-auto group text-slate-600 hover:text-blue-700 hover:bg-blue-50 px-4 py-6 border border-slate-100 hover:border-blue-100 rounded-xl justify-between md:justify-center"
-              >
-                <span className="font-semibold">Vezi arhiva completă</span>
-                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-          </div>
+          <Link
+            to="/anunturi"
+            data-reveal="item"
+            className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 transition-colors hover:text-blue-900"
+          >
+            Vezi toate anunțurile
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        {isInitialLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          </div>
-        ) : visibleAnnouncements.length === 0 ? (
-          <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <p className="text-slate-400 font-medium">Nu există anunțuri recente.</p>
+        {isLoading ? (
+          <div className="mt-8 flex items-center gap-3 text-slate-500" data-reveal="item">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-700" />
+            <span className="text-sm font-medium">Se încarcă ultimele anunțuri...</span>
           </div>
         ) : (
-          <div
-            className="cards-container"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-            onTouchStart={() => setIsPaused(true)}
-            onTouchEnd={() => setIsPaused(false)}
-          >
-            <div className="overflow-hidden rounded-2xl">
-              <div
-                className="carousel-track flex transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
-              >
-                {slides.map((group, slideIdx) => (
-                  <div
-                    key={slideIdx}
-                    className="min-w-full grid grid-cols-1 md:grid-cols-3 gap-5 pb-6"
-                  >
-                    {group.map((announcement) => (
-                      <Link
-                        key={announcement.id}
-                        to="/anunturi"
-                        className="announcement-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-slate-100/60 p-5 shadow-[0_16px_60px_-42px_rgba(0,0,0,0.6)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_18px_80px_-40px_rgba(37,99,235,0.35)]"
-                      >
-                        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/6 via-transparent to-blue-600/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                        <span
-                          className={cn(
-                            "absolute right-4 top-4 h-2 w-2 rounded-full shadow-[0_0_0_6px_rgba(59,130,246,0.08)] transition-transform duration-300",
-                            announcement.category === "Urgent"
-                              ? "bg-red-500"
-                              : "bg-blue-500 group-hover:scale-110"
-                          )}
-                        />
+          <>
+            {!hasLiveAnnouncements ? (
+              <p className="mt-8 text-sm font-medium text-slate-500" data-reveal="item">
+                Model de afișare pentru secțiunea de anunțuri.
+              </p>
+            ) : null}
 
-                        <div className="flex items-center justify-between mb-3 mt-1 relative z-10">
-                          <Badge
-                            variant="secondary"
-                            className={cn(
-                              "px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.18em] border bg-white/70 backdrop-blur",
-                              announcement.category === "Urgent"
-                                ? "text-red-700 border-red-100 bg-red-50/80"
-                                : "text-blue-700 border-blue-100 hover:bg-blue-50"
-                            )}
-                          >
-                            {getCategoryIcon(announcement.category)}
-                            {announcement.category}
-                          </Badge>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1 bg-white/60 backdrop-blur px-2 py-1 rounded-full border border-slate-200/70">
-                            <Clock className="w-3 h-3" />
-                            {new Date(announcement.createdAt).toLocaleDateString("ro-RO")}
-                          </span>
-                        </div>
-
-                        <h3 className="relative z-10 text-lg font-extrabold text-slate-900 mb-2 leading-snug line-clamp-2 transition-colors group-hover:text-blue-700">
-                          {announcement.title}
-                        </h3>
-
-                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed mb-4 line-clamp-3 font-medium flex-grow">
-                          {announcement.content}
-                        </p>
-
-                        <div className="relative z-10 mt-auto flex items-center justify-between gap-2 pt-3 border-t border-slate-200/70">
-                          <span className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 group-hover:text-blue-700 transition-colors">
-                            Citește
-                          </span>
-                          <span className="flex items-center justify-center w-8 h-8 rounded-full border border-slate-200/70 text-blue-600 bg-white/70 backdrop-blur transition-all group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600">
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
-              </div>
+            <div className="mt-8 hidden md:grid md:grid-cols-3 md:gap-6" data-reveal="group">
+              {visibleAnnouncements.map((announcement, index) => (
+                <div
+                  key={announcement.id}
+                  className={index === 0 ? "" : "md:border-l md:border-slate-200 md:pl-6"}
+                >
+                  <AnnouncementEntry announcement={announcement} />
+                </div>
+              ))}
             </div>
 
-            {totalSlides > 1 && (
-              <div className="flex items-center gap-2 mt-4 md:mt-6 justify-start md:justify-end pr-1">
-                {Array.from({ length: totalSlides }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    aria-label={`Sari la slide-ul ${idx + 1}`}
-                    onClick={() => setActiveSlide(idx)}
-                    className={cn(
-                      "h-2 rounded-full transition-all duration-300",
-                      activeSlide === idx
-                        ? "w-6 bg-blue-600"
-                        : "w-2 bg-slate-200 hover:bg-slate-300"
-                    )}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+            <div className="mt-8 md:hidden" data-reveal="item">
+              <Carousel
+                setApi={setMobileApi}
+                opts={{ align: "start", loop: visibleAnnouncements.length > 1 }}
+                className="w-full"
+              >
+                <CarouselContent>
+                  {visibleAnnouncements.map((announcement) => (
+                    <CarouselItem key={announcement.id}>
+                      <AnnouncementEntry announcement={announcement} compact />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+
+              {visibleAnnouncements.length > 1 ? (
+                <div className="mt-5 flex justify-center gap-2">
+                  {visibleAnnouncements.map((announcement, index) => (
+                    <button
+                      key={announcement.id}
+                      type="button"
+                      onClick={() => mobileApi?.scrollTo(index)}
+                      aria-label={`Afișează anunțul ${index + 1}`}
+                      aria-pressed={selectedIndex === index}
+                      className={`h-2 rounded-full transition-all ${
+                        selectedIndex === index ? "w-6 bg-blue-600" : "w-2 bg-slate-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </>
         )}
       </div>
     </section>
   );
-};
-
-export default AnnouncementsSection;
+}

@@ -21,7 +21,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { NAVIGATION_ITEMS } from "@/config/navigation";
-import { useSwipe } from "@/hooks/use-swipe";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 // Constants
@@ -45,11 +44,6 @@ const Header: FC = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useSwipe({
-    onSwipeLeft: () => setIsMobileMenuOpen(true),
-    onSwipeRight: () => setIsMobileMenuOpen(false),
-  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
